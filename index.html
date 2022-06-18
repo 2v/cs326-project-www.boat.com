@@ -33,31 +33,49 @@
 
 <div class="container">
   <div class="header clearfix">
-    <h3 class="text-muted">Disc Cover</h3>
+    <h3 class="text-muted">disc cover</h3>
   </div>
 
   <div class="row app">
     <div class="col-lg-6">
-      <h4>Welcome to Disc Cover!</h4>
-      <p>Connect your Spotify account to automatically determine your preferences, or enter your preferences below.</p>
+      <h4>welcome to disc cover!</h4>
+      <p>connect your Spotify account to automatically determine your preferences, or enter your preferences below.</p>
 
-      <h4>Enter preferences</h4>
+      <h4>enter genres</h4>
       <div class="input-group">
-        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Action</button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">Add genre</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#">Exclude artist</a></li>
-          <li><a class="dropdown-item" href="#">Exclude album</a></li>
-        </ul>
-        <input type="text" class="form-control" aria-label="Text input with 2 dropdown buttons">
+        <select class="form-select" aria-label="Default select example">
+          <option selected>choose a genre</option>
+          <option value="1">One</option>
+          <option value="2">Two</option>
+          <option value="3">Three</option>
+        </select>
         <button class="btn btn-primary " type="button">Submit</button>
       </div>
 
+      <div class="mt-4 p-4 bg-primary text-white rounded">
+        <h1>genres</h1>
+        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Hip/Hop</button>
+        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Rock</button>
+        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Metal</button>
+      </div>
+
+
+      <div class="mt-4">
+        <h4>exclude an artist</h4>
+        <div class="input-group">
+          <input type="exlude_artist" class="form-control" id="exclude artist" placeholder="artist name">
+          <button class="btn btn-primary" type="button">Submit</button>
+        </div>
+      </div>
+
+
+      <div class="mt-4">
+        <button type="button" class="btn btn-success btn-lg btn-block">generate</button>
+      </div>
     </div>
 
     <div class="col-lg-6">
-      <h4>Your albums</h4>
+      <h4></h4>
 
       <div class="row">
         <div class="col">
