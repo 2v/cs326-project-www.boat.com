@@ -1,0 +1,26 @@
+{
+  "name": "cs326-project-www.boat.com",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2v/cs326-project-www.boat.com.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/2v/cs326-project-www.boat.com/issues"
+  },
+  "homepage": "https://github.com/2v/cs326-project-www.boat.com#readme",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.11"
+  }
+}
