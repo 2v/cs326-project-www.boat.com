@@ -2,23 +2,26 @@
 
 import {styles} from "./styles.js";
 import {genres} from "./genres.js";
+import {Albums} from "./albums.js";
 
 let styleList = new Set(styles);
 let genreList = new Set(genres);
-
 
 let genreDefaultText = 'select a genre';
 let styleDefaultText = 'select a style (optional)';
 
 const tags = document.getElementById('tags');
+const albumPane = document.getElementById('albums');
 
 let genreSelect = generateListSelect(genreList,
     document.getElementById("genre_select_plc"), genreDefaultText, 'genre_select');
 let styleSelect = generateListSelect(styleList,
     document.getElementById("style_select_plc"), styleDefaultText, 'style_select');
 
+let albums = new Albums();
+albums.render(albumPane);
+
 document.getElementById("add_tag").addEventListener("click", () => {
-    console.log(genreSelect.value);
     let item = null;
     if(genreSelect.value !== genreDefaultText) {
         item = document.createElement('button');
@@ -45,8 +48,17 @@ document.getElementById("add_tag").addEventListener("click", () => {
     }
 })
 
-document.getElementById("style_select").addEventListener("click", () => {
-    console.log(styleSelect.value);
+document.getElementById("clear_tags").addEventListener("click", () => {
+    tags.innerHTML = '';
+
+    styleList = new Set(styles);
+    genreList = new Set(genres);
+
+    genreSelect = generateListSelect(genreList,
+        document.getElementById("genre_select_plc"), genreDefaultText, 'genre_select');
+    styleSelect = generateListSelect(styleList,
+        document.getElementById("style_select_plc"), styleDefaultText, 'style_select');
+
 })
 
 function generateListSelect(list, element, defaultText, id="") {
@@ -70,7 +82,5 @@ function generateListSelect(list, element, defaultText, id="") {
     return select;
 }
 
-// TODO: implement clear button functionality
-// TODO: generate the album cover pane dynamically (using placeholder images before we set up API)
 // TODO: set up artist exclusion
 // TODO: using local storage to keep persistence with the input data
