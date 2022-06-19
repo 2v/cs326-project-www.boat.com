@@ -9,6 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
   <link rel="icon" href="../../favicon.ico">
+  <script type="module" src="main.js" defer></script>
 
   <title>Disc Cover</title>
 
@@ -41,22 +42,36 @@
       <h4>welcome to disc cover!</h4>
       <p>connect your Spotify account to automatically determine your preferences, or enter your preferences below.</p>
 
-      <h4>enter genres</h4>
-      <div class="input-group">
-        <select class="form-select" aria-label="Default select example">
-          <option selected>choose a genre</option>
-          <option value="1">One</option>
-          <option value="2">Two</option>
-          <option value="3">Three</option>
-        </select>
-        <button class="btn btn-primary " type="button">Submit</button>
+      <div class="mt-4">
+        <h4>enter genres</h4>
+      </div>
+      <div class="genre_select_plc", id="genre_select_plc">
+<!--        <select class="form-select" id="genre_select" aria-label="Default select example">-->
+<!--          <option selected>choose a genre</option>-->
+<!--          <option value="Hip/Hop">Hip/Hop</option>-->
+<!--          <option value="Rock">Rock</option>-->
+<!--          <option value="Jazz">Jazz</option>-->
+<!--        </select>-->
       </div>
 
-      <div class="mt-4 p-4 bg-primary text-white rounded">
-        <h1>genres</h1>
-        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Hip/Hop</button>
-        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Rock</button>
-        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Metal</button>
+      <div class="style_select_plc mt-2" id="style_select_plc">
+<!--        <select class="form-select" multiple aria-label="multiple select example">-->
+<!--          <option selected>Open this select menu</option>-->
+<!--          <option value="1">One</option>-->
+<!--          <option value="2">Two</option>-->
+<!--          <option value="3">Three</option>-->
+<!--        </select>-->
+      </div>
+      <div class="mt-2">
+        <button type="button" class="btn btn-primary" id="add_tag">add</button>
+      </div>
+
+      <div class="mt-5 p-4 bg-primary text-white rounded" id="tags">
+        <h1>tags</h1>
+<!--        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Metal</button>-->
+      </div>
+      <div class="mt-2">
+        <button class="btn btn-primary" type="button">clear</button>
       </div>
 
 
