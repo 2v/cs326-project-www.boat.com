@@ -4,3 +4,5 @@
 3. The application will check the "Hot Releases" section of discogs filtered by genre and styles to determine possible albums.
 4. The application will check new releases on BandCamp again filtered by genre.
 5. The user can enter artists to specifically exclude so that no albums with that artist will be shown
+- NOTE: from the combined BandCamp and Discogs albums, depulicated will be removed and a random selection of 8 albums will be chosen to display to the user. This will provide variety if they choose to generate new albums
+- Link to demo: https://streamable.com/vr5x8r
