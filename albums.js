@@ -158,5 +158,14 @@ export class Albums {
             document.getElementById("genre_select_plc"), this.genreDefaultText, 'genre_select');
         this.styleSelect = this._generateListSelect(this.styleList,
             document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
+        this.genres = [];
+        this.styles = [];
     }
+
+    clearExclusions(element) {
+        element.innerHTML = '';
+
+        this.excludedArtists = [];
+    }
+
 }

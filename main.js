@@ -17,8 +17,11 @@ document.getElementById("clear_tags").addEventListener("click", () => {
     albums.clearTags(tags);
 });
 
+document.getElementById("clear_excluded_artists").addEventListener("click", () => {
+    albums.clearExclusions(excludedArtists);
+});
+
 document.getElementById('add_excluded_artist').addEventListener('click', () => {
-    console.log('test');
     albums.addExcludedArtist(excludedArtists, document.getElementById('exclude_artist_input'));
 });
 
