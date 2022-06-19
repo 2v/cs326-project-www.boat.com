@@ -41,75 +41,51 @@
     <div class="col-lg-6">
       <h4>welcome to disc cover!</h4>
       <p>connect your Spotify account to automatically determine your preferences, or enter your preferences below.</p>
+      <div class="mt-4">
+        <button type="button" class="btn btn-success btn-lg btn-block">connect with spotify</button>
+      </div>
 
       <div class="mt-4">
         <h4>enter genres</h4>
       </div>
-      <div class="genre_select_plc", id="genre_select_plc">
-<!--        <select class="form-select" id="genre_select" aria-label="Default select example">-->
-<!--          <option selected>choose a genre</option>-->
-<!--          <option value="Hip/Hop">Hip/Hop</option>-->
-<!--          <option value="Rock">Rock</option>-->
-<!--          <option value="Jazz">Jazz</option>-->
-<!--        </select>-->
-      </div>
+      <div class="genre_select_plc", id="genre_select_plc"></div>
 
-      <div class="style_select_plc mt-2" id="style_select_plc">
-<!--        <select class="form-select" multiple aria-label="multiple select example">-->
-<!--          <option selected>Open this select menu</option>-->
-<!--          <option value="1">One</option>-->
-<!--          <option value="2">Two</option>-->
-<!--          <option value="3">Three</option>-->
-<!--        </select>-->
-      </div>
+      <div class="style_select_plc mt-2" id="style_select_plc"></div>
+
       <div class="mt-2">
         <button type="button" class="btn btn-primary" id="add_tag">add</button>
       </div>
 
-      <div class="mt-4">
+      <div class="mt-4" id="tags_text">
         <h4>tags</h4>
       </div>
-      <div class="p-4 bg-primary text-white rounded" id="tags">
-<!--        <button type="button" class="btn btn-no-hover" style="background-color: antiquewhite">Metal</button>-->
-      </div>
-      <div class="mt-2">
-        <button class="btn btn-primary" type="button" id="clear_tags">clear</button>
-      </div>
 
+      <div class="p-4 bg-primary text-white rounded" id="tags"></div>
+
+      <div class="mt-2">
+        <button class="btn btn-primary" type="button" id="clear_tags">clear tags</button>
+      </div>
 
       <div class="mt-4">
         <h4>exclude an artist</h4>
         <div class="input-group">
-          <input type="exlude_artist" class="form-control" id="exclude artist" placeholder="artist name">
-          <button class="btn btn-primary" type="button">Submit</button>
+          <input type="exclude_artist_input" class="form-control" id="exclude_artist_input" placeholder="artist name">
+          <button class="btn btn-secondary" type="button" id="add_excluded_artist">submit</button>
         </div>
       </div>
 
+      <div class="mt-2 p-4 bg-secondary text-white rounded" id="excluded_artists"></div>
+
+      <div class="mt-2">
+        <button class="btn btn-secondary" type="button" id="clear_excluded_artists">clear exclusions</button>
+      </div>
 
       <div class="mt-4">
-        <button type="button" class="btn btn-success btn-lg btn-block">generate</button>
+        <button type="button" class="btn btn-primary btn-lg btn-block">generate</button>
       </div>
     </div>
 
-    <div class="col-lg-6" id="albums">
-
-<!--      <div class="row" id="albums">-->
-<!--        <div class="col">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--        </div>-->
-
-<!--        <div class="col">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--          <img src="https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg" alt="album" class="img-thumbnail">-->
-<!--        </div>-->
-<!--      </div>-->
-
-    </div>
+    <div class="col-lg-6" id="albums"></div>
   </div>
 
   <footer class="footer">
