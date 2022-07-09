@@ -604,3 +604,5 @@ export const styles = new Set([
     "Shoegazer",
     "Trallalero"
 ]);
+
+// TODO: fetch styles from the backend server

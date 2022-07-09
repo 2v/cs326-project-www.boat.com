@@ -13,3 +13,6 @@ export const genres = new Set([
     "Children\'s",
     "Brass & Military",
 ])
+
+
+// TODO: fetch genres from the backend server

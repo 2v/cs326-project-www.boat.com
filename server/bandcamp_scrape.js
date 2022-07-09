@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-// a test file for scraping discogs. Prints all the image links from the specified discogs URL
+// Since BandCamp does not provide a public API, we will need to scrape it if we want to get new releases
 
 axios
     .get('https://www.discogs.com/search/?type=release&sort=hot%2Cdesc&ev=em_tr&genre_exact=Hip+Hop&layout=big')
