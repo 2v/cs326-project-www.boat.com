@@ -9,6 +9,7 @@ albums.renderAlbums(albumPane);
 
 
 document.getElementById("add_tag").addEventListener("click", () => {
+    document.getElementById('loginModal').ariaModal
     albums.addGenre(tags);
     albums.addStyle(tags);
 });
