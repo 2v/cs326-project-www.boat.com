@@ -3,6 +3,8 @@ import logger from 'morgan';
 import session from 'express-session';
 import passport from 'passport';
 import passportSpotify from 'passport-spotify';
+import Fuse from 'fuse.js';
+import { styles } from './styles.js'
 
 import pg from 'pg';
 import pgSession from 'express-pg-session';   // for when we use a database for serialization / deserialization
@@ -65,12 +67,14 @@ passport.use(
 
       // TODO: get a user's top 3 genres and add them to the database if they don't already exist
       //  we will set up the database to be indexed by user ID
+
+      // TODO: add user's name to the database, this way we no longer have to interface with Spotify object
       console.log(accessToken);
 
       // a test of using the spotify API to get the top tracks
       try {
         let response = await fetch(
-          "https://api.spotify.com/v1/me/top/tracks",
+          "https://api.spotify.com/v1/me/top/artists",
           {
             method: 'GET',
             headers: {
@@ -80,8 +84,37 @@ passport.use(
             }
           }
         );
-        console.log(response.ok);
-        console.log(await response.json());
+
+        let responseJSON = await response.json();
+
+        const options = {
+          includeScore: true
+        }
+
+        // use fuse to perform a fuzzy search of the styles database
+        const fuse = new Fuse(styles, options)
+
+        // for debugging
+        // let genres = responseJSON.items.reduce((acc, e) => acc.concat(e.genres), [])
+        // console.log(genres);
+
+        // search each genre for each artist using fuse and concatenate them together
+        let genresSearchResults = responseJSON.items.reduce((acc, e) => acc.concat(
+          e.genres.reduce((acc, e) => acc.concat(fuse.search(e)), [])), [])
+
+        // sort the search results to get the best matches
+        let bestMatches = genresSearchResults.sort((a, b) => a.score - b.score);
+
+        // use the sorted results to create a set of unique genres with size GENRE_LIST_SIZE
+        let GENRE_LIST_SIZE = 20;
+        let genreSet = new Set([]);
+        let i = 0;
+        while (genreSet.size < GENRE_LIST_SIZE || i >= bestMatches.size) {
+          genreSet.add(bestMatches[i].item);
+          i++;
+        }
+
+        console.log(genreSet);
       } catch(error) {
         console.log(error);
       }
