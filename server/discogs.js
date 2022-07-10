@@ -42,9 +42,9 @@ export async function generateAlbums(styles, albumCount, minimumHave) {
 
   return shuffle(albums).slice(0, albumCount);
 }
-
-let albums = await generateAlbums(['Hip Hop'], 10, 100);
-console.log(albums);
+//
+// let albums = await generateAlbums(['Hip Hop'], 10, 100);
+// console.log(albums);
 
 // TODO: possibly use database to store a users suggestions and allow them to view past album recommendations
 //      we could use Passport for this, users who are logged in will be able to access their past set of recommended albums

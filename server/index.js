@@ -175,12 +175,10 @@ app.get(
 // });
 
 app.get('/account', async (request, response) => {
-  // res.render('account.html', {user: req.user});
-
   if (request.user) {
-    response.json(request.user );
+    response.json({'status': 'success', 'user': request.user});
   } else {
-    response.status(401).send('Not authorized');
+    response.status(401).json({'status': 'failure'});
   }
 });
 
