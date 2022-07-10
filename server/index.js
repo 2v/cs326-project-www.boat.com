@@ -3,6 +3,7 @@ import logger from 'morgan';
 import session from 'express-session';
 import passport from 'passport';
 import passportSpotify from 'passport-spotify';
+
 import pg from 'pg';
 import pgSession from 'express-pg-session';   // for when we use a database for serialization / deserialization
 
@@ -60,15 +61,32 @@ passport.use(
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       callbackURL: 'http://localhost:' + port + authCallbackPath,
     },
-    function (accessToken, refreshToken, expires_in, profile, done) {
-      // asynchronous verification, for effect...
-      process.nextTick(function () {
-        // To keep the example simple, the user's spotify profile is returned to
-        // represent the logged-in user. In a typical application, you would want
-        // to associate the spotify account with a user record in your database,
-        // and return that user instead.
-        return done(null, profile);
-      });
+    async function (accessToken, refreshToken, expires_in, profile, done) {
+
+      // TODO: get a user's top 3 genres and add them to the database if they don't already exist
+      //  we will set up the database to be indexed by user ID
+      console.log(accessToken);
+
+      // a test of using the spotify API to get the top tracks
+      try {
+        let response = await fetch(
+          "https://api.spotify.com/v1/me/top/tracks",
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer ' + accessToken,
+              'Content-Type': 'application/json',
+
+            }
+          }
+        );
+        console.log(response.ok);
+        console.log(await response.json());
+      } catch(error) {
+        console.log(error);
+      }
+
+      return done(null, profile);
     }
   )
 );
@@ -90,8 +108,6 @@ app.use(session({
 // persistent login sessions (recommended).
 app.use(passport.initialize());
 app.use(passport.session());
-
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -117,7 +133,7 @@ app.post('/getAlbums', async (request, response) => {
 app.get(
   '/auth/spotify',
   passport.authenticate('spotify', {
-    scope: ['user-read-email', 'user-read-private'],
+    scope: ['user-read-email', 'user-read-private', 'user-top-read'],
     showDialog: true,
   })
 );
