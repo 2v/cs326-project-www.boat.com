@@ -1,22 +1,42 @@
 import 'dotenv/config';
 
 const discogsURL = "https://api.discogs.com/";
+const DISCOGS_CONSUMER_KEY = process.env.DISCOGS_CONSUMER_KEY;
+const DISCOGS_CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET;
 
-export async function getAlbums(genres) {
-  // TODO: use .env file to store Discogs API key and secret and add this file to gitignore
-  console.log("test");
+export async function generateAlbums(styles, albumCount) {
+  let albums = []; // albums will be a list containing objects with thumbnail image and link to discogs page
 
-  // testing use of environment variables
-  console.log(process.env.DISCOGS_CONSUMER_KEY);
+  // search this and last year to avoid querying too much
+  const date = new Date();
+  let yearsToSearch = [date.getFullYear(), date.getFullYear() - 1];
 
+  for (const year of yearsToSearch) {
+    for (const style of styles) {
+      console.log(`${discogsURL}database/search?type=master&style=${style}&year=${year}&key=${DISCOGS_CONSUMER_KEY}&secret=${DISCOGS_CONSUMER_SECRET}`)
+      let response = await fetch(
+        `${discogsURL}database/search?type=master&style=${style}&year=${year}&key=${DISCOGS_CONSUMER_KEY}&secret=${DISCOGS_CONSUMER_SECRET}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
+      if (!response.ok) {
+        console.log("response not ok");
+        return -1;
+      }
 
-  // TODO: make fetch request for JSON response
-  // TODO: sort response by release year, and slice the top 200 or so
-  // TODO: select random albums from this set and return
+      albums.push((await response.json()).results.map(x => { return {"url": `https://discogs.com${x.uri}`, "thumbnail": x.thumb}}))
+    }
+    console.log(albums);
 
+  }
 }
 
+generateAlbums(['Hip Hop'], []);
 
 // TODO: possibly use database to store a users suggestions and allow them to view past album recommendations
 //      we could use Passport for this, users who are logged in will be able to access their past set of recommended albums

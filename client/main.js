@@ -26,4 +26,5 @@ document.getElementById('add_excluded_artist').addEventListener('click', () => {
     albums.addExcludedArtist(excludedArtists, document.getElementById('exclude_artist_input'));
 });
 
-// TODO: using local storage to keep persistence with the input data
+// TODO: make request to server to determine if user is logged in or not. If they are logged in we want to display
+//      their username. If they are not, we display the connect to spotify button

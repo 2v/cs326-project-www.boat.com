@@ -5,35 +5,18 @@ import passport from 'passport';
 import passportSpotify from 'passport-spotify';
 import Fuse from 'fuse.js';
 import { styles } from './styles.js'
+import {database} from "./database.js";   // for when we use a database for serialization / deserialization
 
-import pg from 'pg';
-import pgSession from 'express-pg-session';   // for when we use a database for serialization / deserialization
+import epgSession from 'express-pg-session';
+const pgSession = epgSession(session);
 
-import {getAlbums} from "./discogs.js";
 
 const SpotifyStrategy = passportSpotify.Strategy;
+
 const authCallbackPath = '/auth/spotify/callback';
 
 const port = process.env.PORT || 8888;
 
-// TODO: look into using a database for maintaining session
-//
-// const pgPool = new pg.Pool({
-//   // Create a new Pool. The Pool manages a set of connections to the database.
-//   // It will keep track of unused connections, and reuse them when new queries
-//   // are needed. The constructor requires a database URL to make the
-//   // connection. You can find the URL of your database by looking in Heroku
-//   // or you can run the following command in your terminal:
-//   //
-//   //  heroku pg:credentials:url -a APP_NAME
-//   //
-//   // Replace APP_NAME with the name of your app in Heroku.
-//   connectionString: this.dburl,
-//   ssl: { rejectUnauthorized: false }, // Required for Heroku connections
-// });
-//
-// // create the pool
-// const client = await pgPool.connect();
 
 // example code from: https://github.com/JMPerez/passport-spotify
 // Passport session setup.
@@ -43,12 +26,12 @@ const port = process.env.PORT || 8888;
 //   the user by ID when deserializing. However, since this example does not
 //   have a database of user records, the complete spotify profile is serialized
 //   and deserialized.
-passport.serializeUser(function (user, done) {
-  done(null, user);
+passport.serializeUser(function (user, callback) {
+  callback(null, user);
 });
 
-passport.deserializeUser(function (obj, done) {
-  done(null, obj);
+passport.deserializeUser(function (user, callback) {
+  callback(null, user);
 });
 
 
@@ -80,7 +63,6 @@ passport.use(
             headers: {
               'Authorization': 'Bearer ' + accessToken,
               'Content-Type': 'application/json',
-
             }
           }
         );
@@ -115,7 +97,7 @@ passport.use(
         }
 
         console.log(genreSet);
-      } catch(error) {
+    } catch(error) {
         console.log(error);
       }
 
@@ -132,10 +114,11 @@ app.use(session({
   resave: true, // originally false
   saveUninitialized: true,  // originally false
   // store: new pgSession({
-  //   pool : pgPool,                // Connection pool
+  //   pool : database.pool,                // Connection pool
   //   tableName : 'user_sessions'   // Use another table-name than the default "session" one
   // })
 }));
+
 // Add middleware to the Express app.
 // Initialize Passport!  Also use passport.session() middleware, to support
 // persistent login sessions (recommended).
@@ -186,9 +169,19 @@ app.get(
 
 // an example of a route that includes the user's spotify information and will only work if the user is logged in with
 // spotify
-app.get('/account', ensureAuthenticated, function (req, res) {
+// app.get('/account', ensureAuthenticated, function (req, res) {
+//   // res.render('account.html', {user: req.user});
+//   res.json({ message: 'Hello World!', user: req.user });
+// });
+
+app.get('/account', async (request, response) => {
   // res.render('account.html', {user: req.user});
-  res.json({ message: 'Hello World!', user: req.user });
+
+  if (request.user) {
+    response.json(request.user );
+  } else {
+    response.status(401).send('Not authorized');
+  }
 });
 
 // This matches all routes that are not defined.
@@ -200,8 +193,6 @@ app.all('*', async (request, response) => {
 app.listen(port, () => {
   console.log(`Disc Cover listening on port ${port}!`);
 });
-
-// await getAlbums();
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
