@@ -73,15 +73,20 @@ passport.use(
         const TIME_SECONDS_TO_RELOAD_ALBUMS = 60;
         let dbUser = await database.getUser(profile.id);
         let today = new Date();
+        let userStyles = undefined;
+
         if (dbUser.length < 1 || (today.getTime() - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_ALBUMS) {
-          let userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
+          console.log('FETCHING NEW DATA FOR USER')
+          userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
           // TODO: get albums here and save them to database
           await database.saveStyles(profile.id, userStyles, today.getTime());
         } else {
-          // TODO: reload the user's saved styles and albums from database
+          console.log('RELOADING DATA FOR USER')
+          userStyles = JSON.parse(dbUser.styles);
+          // let userAlbums = JSON.parse(dbUser.albums);
         }
 
-        // console.log(userStyles);
+        console.log(userStyles);
     } catch(error) {
         console.log(error);
       }
@@ -115,11 +120,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(logger('dev'));
 app.use('/', express.static('client'));
-// app.use('/login', express.static('client'));
 
 app.get('/login', async (request, response) => {
   console.log('login prompt pressed');
+});
 
+app.get('/logout', function(req, res){
+  req.logout(function() {
+    res.redirect('/');
+  });
 });
 
 // TODO: Implement the /getAlbums endpoint

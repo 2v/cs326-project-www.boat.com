@@ -16,6 +16,7 @@ if (sessionUser.status === 'success') {
     // albums, their tags, and their excluded artists from the database
     spotifyPane.innerHTML = `
         <h4>hello, ${sessionUser.user.displayName}</h4>
+        <a class="btn btn-info btn-lg btn-block" href="/logout" role="button">log out</a>
     `
 } else {
     spotifyPane.innerHTML = `
