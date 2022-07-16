@@ -13,7 +13,8 @@ const pgSession = epgSession(session);
 // import epgSession from 'express-pg-session';
 // const pgSession = epgSession(session);
 
-import {parseStylesFromTopArtists} from "./utils.js";
+import {parseStylesFromTopArtists, shuffle} from "./utils.js";
+import {generateAlbums} from "./discogs.js";
 
 
 const SpotifyStrategy = passportSpotify.Strategy;
@@ -71,22 +72,17 @@ passport.use(
         let responseJSON = await response.json();
 
         const TIME_SECONDS_TO_RELOAD_ALBUMS = 60;
-        let dbUser = await database.getUser(profile.id);
+        let dbUser = await database.getStyles(profile.id);
         let today = new Date();
-        let userStyles = undefined;
 
+        // get style and album data if it doesn't exist in the table yet or if the data is stale
         if (dbUser.length < 1 || (today.getTime() - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_ALBUMS) {
           console.log('FETCHING NEW DATA FOR USER')
-          userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
-          // TODO: get albums here and save them to database
+          let userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
           await database.saveStyles(profile.id, userStyles, today.getTime());
-        } else {
-          console.log('RELOADING DATA FOR USER')
-          userStyles = JSON.parse(dbUser.styles);
-          // let userAlbums = JSON.parse(dbUser.albums);
         }
 
-        console.log(userStyles);
+        // console.log(userStyles);
     } catch(error) {
         console.log(error);
       }
@@ -199,8 +195,6 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/');
 }
 
-let today = new Date();
-console.log(today.getTime())
 
-await database.saveStyles('1001', ['rock', 'classical'], today.getTime());
-console.log(await database.getUser('1001'));
+// await database.saveStyles('1001', ['rock', 'classical'], today.getTime());
+// console.log(await database.getUser('1001'));

@@ -34,20 +34,16 @@ class Database {
   async init() {
     const generateTables = `
       create table if not exists user_styles (
-        user_id varchar(128) primary key,
-        -- we will serialize a user's list of style preferences and store it here
+        id varchar(128) primary key,
         styles varchar (512),
         ts bigint
---         ts timestamp 
-        -- TODO: implement timestamp so that we can avoid regenerating styles if they were
-        --       generated recently
       );
 
-      create table if not exists user_exclusions (
-          user_id varchar(128) primary key,
-          exclusions varchar (1024)
+      create table if not exists user_albums (
+          id varchar(128) primary key,
+          albums varchar (10000),
+          ts bigint
           );
-
     `;
     const res = await this.client.query(generateTables);
   }
@@ -62,28 +58,46 @@ class Database {
    *
    * @param {string} spotifyID
    * @param {string[]} styles
+   * @param {int} ts
    */
   async saveStyles(spotifyID, styles, ts) {
-    // delete table entry if it exists
-    const deleteText = 'DELETE FROM user_styles WHERE user_id = ($1)';
+    // perform UPSERT by deleting table if it exists and adding new entry
+    const deleteText = 'DELETE FROM user_styles WHERE id = ($1)';
     await this.client.query(deleteText, [spotifyID]);
 
     let stylesSerialized = JSON.stringify(styles);
-    const insertText = 'INSERT INTO user_styles (user_id, styles, ts) VALUES ($1, $2, $3) RETURNING *';
+
+    const insertText = 'INSERT INTO user_styles (id, styles, ts) VALUES ($1, $2, $3) RETURNING *';
     await this.client.query(insertText, [spotifyID, stylesSerialized, ts]);
   }
 
   /**
    *
    * @param {string} spotifyID
+   * @param {string[]} styles
+   * @param {int} ts
    */
-  async getUser(spotifyID) {
+  async saveAlbums(spotifyID, albums) {
+    // perform UPSERT by deleting table if it exists and adding new entry
+    const deleteText = 'DELETE FROM user_albums WHERE id = ($1)';
+    await this.client.query(deleteText, [spotifyID]);
+
+    let albumsSerialized = JSON.stringify(albums);
+
+    const insertText = 'INSERT INTO users (id, albums) VALUES ($1, $2) RETURNING *';
+    await this.client.query(insertText, [spotifyID, albumsSerialized]);
+  }
+
+  /**
+   *
+   * @param {string} spotifyID
+   */
+  async getStyles(spotifyID) {
     const queryText =
-      'SELECT * FROM user_styles WHERE user_id = ($1)'
+      'SELECT * FROM user_styles WHERE id = ($1)'
     const res = await this.client.query(queryText, [spotifyID]);
     return res.rows.length < 1 ? [] : res.rows[0];
   }
-
 }
 
 export const database = new Database(process.env.DATABASE_URL);

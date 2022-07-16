@@ -37,7 +37,7 @@ function parseStylesFromTopArtists(response, styleCount, styles) {
     i++;
   }
 
-  return styleSet;
+  return Array.from(styleSet);
 }
 
 export { shuffle, parseStylesFromTopArtists}
