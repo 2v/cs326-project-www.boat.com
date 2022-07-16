@@ -1,4 +1,4 @@
-import {getState} from "./state.js";
+import {getState, setState} from "./state.js";
 import {styles} from "./styles.js";
 import {getAlbums} from "./crud.js";
 
@@ -12,20 +12,16 @@ export class Albums {
     }
 
     async init() {
-        if (!this._restoreAlbumState()) {
-            await this.reset();
-        }
+        await this.reset();
     }
 
     async reset() {
-        this.albums = new Array(2).fill([]).map(x => new Array(4).fill({
-            'url': '/',
-            'thumbnail': placeholderImg
-        }));
-
-        let userAlbums = await getAlbums();
-        console.log(userAlbums);
-        if (userAlbums.length > 0) { this.setAlbums(userAlbums); }
+        if (!(await this._restoreAlbumState())) {
+            this.albums = new Array(2).fill([]).map(x => new Array(4).fill({
+                'url': '/',
+                'thumbnail': placeholderImg
+            }));
+        }
 
         this.styleList = new Set(styles);
 
@@ -60,14 +56,22 @@ export class Albums {
         return select;
     }
 
-    _restoreAlbumState() {
-        let albums = getState('albums');
-        if(!albums) {
-            return false;
+    async _restoreAlbumState() {
+        // first attempt to restore albums from the database
+        let albums = await getAlbums();
+        if (albums.length > 0) {
+            this.setAlbums(albums);
+            return true;
         }
 
-        this.albums = albums;
-        return true;
+        // next attempt to save albums from local storage
+        albums = getState('albums');
+        if(albums) {
+            this.albums = albums;
+            return true;
+        }
+
+        return false;
     }
 
     _saveAlbumState() {
@@ -175,6 +179,7 @@ export class Albums {
     setAlbums(albums) {
         this.albums = new Array(2).fill([]).map((x, i) => new Array(4)
           .fill([]).map((y, j) => albums[i*4 + j]));
+        this._saveAlbumState();
     }
 
 }
