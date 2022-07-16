@@ -7,16 +7,22 @@ import Fuse from 'fuse.js';
 import { styles } from './styles.js'
 import {database} from "./database.js";   // for when we use a database for serialization / deserialization
 
-import epgSession from 'express-pg-session';
-import {parseStylesFromTopArtists} from "./utils.js";
+import epgSession from 'connect-pg-simple';
 const pgSession = epgSession(session);
+
+// import epgSession from 'express-pg-session';
+// const pgSession = epgSession(session);
+
+import {parseStylesFromTopArtists} from "./utils.js";
 
 
 const SpotifyStrategy = passportSpotify.Strategy;
 
 const authCallbackPath = '/auth/spotify/callback';
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8888;
+
+await database.connect();
 
 
 // example code from: https://github.com/JMPerez/passport-spotify
@@ -48,13 +54,7 @@ passport.use(
       callbackURL: 'http://localhost:' + port + authCallbackPath,
     },
     async function (accessToken, refreshToken, expires_in, profile, done) {
-
-      // TODO: get a user's top 3 genres and add them to the database if they don't already exist
-      //  we will set up the database to be indexed by user ID
-
       // TODO: add user's name to the database, this way we no longer have to interface with Spotify object
-      console.log(accessToken);
-
       // a test of using the spotify API to get the top tracks
       try {
         let response = await fetch(
@@ -69,15 +69,19 @@ passport.use(
         );
 
         let responseJSON = await response.json();
-        let styles = parseStylesFromTopArtists(responseJSON, 20, styles);
 
+        const TIME_SECONDS_TO_RELOAD_ALBUMS = 60;
+        let dbUser = await database.getUser(profile.id);
+        let today = new Date();
+        if (dbUser.length < 1 || (today.getTime() - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_ALBUMS) {
+          let userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
+          // TODO: get albums here and save them to database
+          await database.saveStyles(profile.id, userStyles, today.getTime());
+        } else {
+          // TODO: reload the user's saved styles and albums from database
+        }
 
-        // TODO: think about selecting a random set of these genres, since we are only sorting by relevance but
-        // a user's favorite genre might simply appear lower in the fuzzy score search
-
-        // TODO: once we have genre list, add to database
-
-        console.log(styles);
+        // console.log(userStyles);
     } catch(error) {
         console.log(error);
       }
@@ -94,10 +98,11 @@ app.use(session({
   secret: 'keyboard cat',
   resave: true, // originally false
   saveUninitialized: true,  // originally false
-  // store: new pgSession({
-  //   pool : database.pool,                // Connection pool
-  //   tableName : 'user_sessions'   // Use another table-name than the default "session" one
-  // })
+  store: new pgSession({
+    pool: database.pool,
+    tableName: 'user_sessions',
+    createTableIfMissing: true
+  })
 }));
 
 // Add middleware to the Express app.
@@ -185,5 +190,8 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/');
 }
 
-await database.connect();
-await database.saveStyles('1001', ['rock', 'classical']);
+let today = new Date();
+console.log(today.getTime())
+
+await database.saveStyles('1001', ['rock', 'classical'], today.getTime());
+console.log(await database.getUser('1001'));

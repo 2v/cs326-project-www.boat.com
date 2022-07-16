@@ -24,13 +24,15 @@ function parseStylesFromTopArtists(response, styleCount, styles) {
   let styleSearchResults = response.items.reduce((acc, e) => acc.concat(
     e.genres.reduce((acc, e) => acc.concat(fuse.search(e)), [])), [])
 
+  // console.log(styleSearchResults);
+
   // sort the search results to get the best matches
   let bestMatches = styleSearchResults.sort((a, b) => a.score - b.score);
 
   // use the sorted results to create a set of styles with size styleCount
   let styleSet = new Set([]);
   let i = 0;
-  while (styleSet.size < styleCount && i >= bestMatches.size) {
+  while ((styleSet.size < styleCount) && (i < bestMatches.length)) {
     styleSet.add(bestMatches[i].item);
     i++;
   }
