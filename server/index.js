@@ -166,6 +166,7 @@ app.get('/account', async (request, response) => {
 
 // --------------- CRUD OPERATIONS ------------------- //
 
+// generates albums by searching discogs by style
 app.post('/generateAlbums', async (req, res) => {
   const options = req.body;
   let albums = await generateAlbums(options.styles, 50, 150);
@@ -190,7 +191,18 @@ app.get('/styles', async (req, res) => {
   }
 });
 
-
+app.get('/albums', async (req, res) => {
+  if (req.user) {
+    let userAlbums = await database.getAlbums(req.user.id);
+    if (userAlbums === -1) {
+      res.json({'status': 'success', 'albums': []});
+    } else {
+      res.json({'status': 'success', 'albums': JSON.parse(userAlbums.albums)});
+    }
+  } else {
+    res.status(401).json({'status': 'failure'});
+  }
+});
 
 // -------------------- SETUP WEBSERVER --------------------- //
 

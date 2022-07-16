@@ -41,8 +41,7 @@ class Database {
 
       create table if not exists user_albums (
           id varchar(128) primary key,
-          albums varchar (40000),
-          ts bigint
+          albums varchar (40000)
           );
     `;
     const res = await this.client.query(generateTables);
@@ -96,7 +95,18 @@ class Database {
     const queryText =
       'SELECT * FROM user_styles WHERE id = ($1)'
     const res = await this.client.query(queryText, [spotifyID]);
-    return res.rows.reduce((acc, e) => e);  // return an item if there is any
+    return res.rows.reduce((acc, e) => e, -1);  // return an item if there is any
+  }
+  /**
+   *
+   * @param {string} spotifyID
+   */
+
+  async getAlbums(spotifyID) {
+    const queryText =
+      'SELECT * FROM user_albums WHERE id = ($1)'
+    const res = await this.client.query(queryText, [spotifyID]);
+    return res.rows.reduce((acc, e) => e, -1);  // return an item if there is any
   }
 }
 

@@ -7,6 +7,7 @@ const albumPane = document.getElementById('albums');
 const spotifyPane = document.getElementById('spotify_connect');
 
 let albums = new Albums();
+await albums.init();
 albums.renderAlbums(albumPane);
 
 // display the user's spotify name if they are logged in

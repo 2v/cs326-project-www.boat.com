@@ -7,7 +7,18 @@ export async function readSessionUser() {
 }
 
 export async function getAlbums() {
+  const response = await fetch(`/albums`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
+  if (response.ok) {
+    return (await response.json()).albums;
+  } else {
+    return [];
+  }
 }
 
 export async function generateAlbums(styles) {

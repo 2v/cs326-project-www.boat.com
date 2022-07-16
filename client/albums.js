@@ -1,5 +1,6 @@
 import {getState} from "./state.js";
 import {styles} from "./styles.js";
+import {getAlbums} from "./crud.js";
 
 let placeholderImg = "images/placeholder.png";
 
@@ -8,16 +9,24 @@ const MAX_STYLES = 8;
 
 export class Albums {
     constructor() {
+    }
+
+    async init() {
         if (!this._restoreAlbumState()) {
-            this.reset();
+            await this.reset();
         }
     }
 
-    reset() {
+    async reset() {
         this.albums = new Array(2).fill([]).map(x => new Array(4).fill({
             'url': '/',
             'thumbnail': placeholderImg
         }));
+
+        let userAlbums = await getAlbums();
+        console.log(userAlbums);
+        if (userAlbums.length > 0) { this.setAlbums(userAlbums); }
+
         this.styleList = new Set(styles);
 
         this.styleDefaultText = 'select a style';
@@ -160,12 +169,10 @@ export class Albums {
 
     clearExclusions(element) {
         element.innerHTML = '';
-
         this.excludedArtists = [];
     }
 
     setAlbums(albums) {
-        console.log(albums);
         this.albums = new Array(2).fill([]).map((x, i) => new Array(4)
           .fill([]).map((y, j) => albums[i*4 + j]));
     }
