@@ -11,11 +11,7 @@ export class Albums {
     constructor() {
     }
 
-    async init() {
-        await this.reset();
-    }
-
-    async reset() {
+    async init(tagElement, styleSelectElement) {
         if (!(await this._restoreAlbumState())) {
             this.albums = new Array(2).fill([]).map(x => new Array(4).fill({
                 'url': '/',
@@ -23,14 +19,18 @@ export class Albums {
             }));
         }
 
+        this.tagElement = tagElement;
+        this.styleSelectElement = styleSelectElement;
+
         this.styleList = new Set(styles);
+        this.styles = [];
+        this._restoreStyleState(tagElement);
 
         this.styleDefaultText = 'select a style';
 
         this.styleSelect = this._generateListSelect(this.styleList,
-            document.getElementById('style_select_plc'), this.styleDefaultText, 'style_select');
+            this.styleSelectElement, this.styleDefaultText, 'style_select');
 
-        this.styles = [];
         this.excludedArtists = [];
     }
 
@@ -76,6 +76,17 @@ export class Albums {
 
     _saveAlbumState() {
         setState('albums', this.albums);
+    }
+
+    _saveStyleState() {
+        setState('styles', this.styles);
+    }
+
+    _restoreStyleState() {
+        let styles = getState('styles');
+        if (styles) {
+            styles.forEach(style => this.addStyle(style, this.tagElement));
+        }
     }
 
     renderAlbums(element) {
@@ -143,6 +154,8 @@ export class Albums {
         this.styleSelect = this._generateListSelect(this.styleList,
           document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
 
+        this._saveStyleState();
+
         return 0;
     }
 
@@ -169,6 +182,7 @@ export class Albums {
         this.styleSelect = this._generateListSelect(this.styleList,
             document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
         this.styles = [];
+        this._saveStyleState();
     }
 
     clearExclusions(element) {

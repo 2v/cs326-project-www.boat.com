@@ -5,9 +5,10 @@ const tags = document.getElementById('tags');
 const excludedArtists = document.getElementById('excluded_artists');
 const albumPane = document.getElementById('albums');
 const spotifyPane = document.getElementById('spotify_connect');
+const styleSelect = document.getElementById('style_select_plc');
 
 let albums = new Albums();
-await albums.init();
+await albums.init(tags, styleSelect);
 albums.renderAlbums(albumPane);
 
 // display the user's spotify name if they are logged in
