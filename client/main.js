@@ -1,5 +1,5 @@
 import {Albums} from "./albums.js";
-import {getStyles, readSessionUser} from "./crud.js";
+import {generateAlbums, getStyles, readSessionUser} from "./crud.js";
 
 const tags = document.getElementById('tags');
 const excludedArtists = document.getElementById('excluded_artists');
@@ -38,7 +38,10 @@ document.getElementById("clear_tags").addEventListener("click", () => {
 
 document.getElementById("load_styles").addEventListener("click", async () => {
     let styles = await getStyles(4);
-    styles.forEach(style => albums.addStyle(style, tags));
+    styles.every(style => {
+        let status = albums.addStyle(style, tags);
+        return (status !== -1);
+    });
 });
 
 document.getElementById("clear_excluded_artists").addEventListener("click", () => {
@@ -47,4 +50,13 @@ document.getElementById("clear_excluded_artists").addEventListener("click", () =
 
 document.getElementById('add_excluded_artist').addEventListener('click', () => {
     albums.addExcludedArtist(excludedArtists, document.getElementById('exclude_artist_input'));
+});
+
+document.getElementById("generate").addEventListener("click", async () => {
+    if (albums.styles.length < 1) {
+        alert("You must have at least one style selected to generate albums!")
+        return;
+    }
+    albums.setAlbums(await generateAlbums(albums.styles));
+    albums.renderAlbums(albumPane);
 });

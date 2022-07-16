@@ -41,7 +41,7 @@ class Database {
 
       create table if not exists user_albums (
           id varchar(128) primary key,
-          albums varchar (10000),
+          albums varchar (40000),
           ts bigint
           );
     `;
@@ -84,7 +84,7 @@ class Database {
 
     let albumsSerialized = JSON.stringify(albums);
 
-    const insertText = 'INSERT INTO users (id, albums) VALUES ($1, $2) RETURNING *';
+    const insertText = 'INSERT INTO user_albums (id, albums) VALUES ($1, $2) RETURNING *';
     await this.client.query(insertText, [spotifyID, albumsSerialized]);
   }
 

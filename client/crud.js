@@ -10,8 +10,16 @@ export async function getAlbums() {
 
 }
 
-export async function generateAlbums() {
+export async function generateAlbums(styles) {
+  const response = await fetch(`/generateAlbums`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ styles: styles })
+  });
 
+  return await response.json();
 }
 
 export async function getStyles(styleCount) {

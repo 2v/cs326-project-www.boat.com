@@ -3,6 +3,9 @@ import {styles} from "./styles.js";
 
 let placeholderImg = "images/placeholder.png";
 
+// TODO: have file for constants like these?
+const MAX_STYLES = 8;
+
 export class Albums {
     constructor() {
         if (!this._restoreAlbumState()) {
@@ -101,8 +104,6 @@ export class Albums {
         if (status === -1) {
             console.error('No such style exists in local database!')
         }
-
-
     }
 
     addStyle(style, element) {
@@ -110,10 +111,16 @@ export class Albums {
             return -1;
         }
 
+        if (this.styles.length >= MAX_STYLES) {
+            alert("You can have at most 8 styles!")
+            return -1;
+        }
+
         let item = document.createElement('button');
         item.type = 'button';
         item.classList.add('btn');
         item.classList.add('btn-primary');
+        item.classList.add('style-btn');
         item.innerText = style;
         element.appendChild(item);
 
@@ -122,6 +129,8 @@ export class Albums {
 
         this.styleSelect = this._generateListSelect(this.styleList,
           document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
+
+        return 0;
     }
 
     addExcludedArtist(element, inputField) {
@@ -153,6 +162,12 @@ export class Albums {
         element.innerHTML = '';
 
         this.excludedArtists = [];
+    }
+
+    setAlbums(albums) {
+        console.log(albums);
+        this.albums = new Array(2).fill([]).map((x, i) => new Array(4)
+          .fill([]).map((y, j) => albums[i*4 + j]));
     }
 
 }
