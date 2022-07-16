@@ -96,7 +96,7 @@ class Database {
     const queryText =
       'SELECT * FROM user_styles WHERE id = ($1)'
     const res = await this.client.query(queryText, [spotifyID]);
-    return res.rows.length < 1 ? [] : res.rows[0];
+    return res.rows.reduce((acc, e) => e);  // return an item if there is any
   }
 }
 

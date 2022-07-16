@@ -1,6 +1,5 @@
 import {getState} from "./state.js";
 import {styles} from "./styles.js";
-import {genres} from "./genres.js";
 
 let placeholderImg = "images/placeholder.png";
 
@@ -12,20 +11,17 @@ export class Albums {
     }
 
     reset() {
-        this.albums = new Array(2).fill([]).map(x => new Array(4).fill(placeholderImg));
+        this.albums = new Array(2).fill([]).map(x => new Array(4).fill({
+            'url': '/',
+            'thumbnail': placeholderImg
+        }));
         this.styleList = new Set(styles);
-        this.genreList = new Set(genres);
 
-        this.genreDefaultText = 'select a genre';
-        this.styleDefaultText = 'select a style (optional)';
+        this.styleDefaultText = 'select a style';
 
-
-        this.genreSelect = this._generateListSelect(this.genreList,
-            document.getElementById("genre_select_plc"), this.genreDefaultText, 'genre_select');
         this.styleSelect = this._generateListSelect(this.styleList,
-            document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
+            document.getElementById('style_select_plc'), this.styleDefaultText, 'style_select');
 
-        this.genres = [];
         this.styles = [];
         this.excludedArtists = [];
     }
@@ -76,61 +72,56 @@ export class Albums {
             let colDiv = document.createElement('div');
             colDiv.classList.add('col');
 
-            column.forEach(imgURL => {
+            column.forEach(album => {
+
+                let imgLink = document.createElement('a');
+                imgLink.href = album.url;
 
                 let img = document.createElement('img');
-                img.src = imgURL;
+                img.src = album.thumbnail;
                 img.alt = 'album';
                 img.classList.add('img-thumbnail');
 
-                colDiv.appendChild(img);
+                imgLink.appendChild(img);
+
+                colDiv.appendChild(imgLink);
             })
             rowDiv.appendChild(colDiv);
         })
         element.appendChild(rowDiv);
     }
 
-
-    generateAlbums() {
-        // TODO: use scraping tools and current genre and style data to generate new albums
-
-        this._saveAlbumState()
-    }
-
-    addGenre(element) {
-        if(this.genreSelect.value === this.genreDefaultText) {
-            return -1;
-        }
-
-        let item = document.createElement('button');
-        item.type = 'button';
-        item.classList.add('btn');
-        item.classList.add('btn-primary');
-        item.innerText = this.genreSelect.value;
-        this.genreList.delete(this.genreSelect.value);
-        this.genres.push(this.genreSelect.value);
-        element.appendChild(item);
-
-        this.genreSelect = this._generateListSelect(this.genreList,
-            document.getElementById("genre_select_plc"), this.genreDefaultText, 'genre_select');
-    }
-
-    addStyle(element) {
+    addStyleFromSelect(element) {
         if(this.styleSelect.value === this.styleDefaultText) {
             return -1;
         }
 
+        let status = this.addStyle(this.styleSelect.value, element);
+
+        if (status === -1) {
+            console.error('No such style exists in local database!')
+        }
+
+
+    }
+
+    addStyle(style, element) {
+        if (!this.styleList.has(style)) {
+            return -1;
+        }
+
         let item = document.createElement('button');
         item.type = 'button';
         item.classList.add('btn');
         item.classList.add('btn-primary');
-        item.innerText = this.styleSelect.value;
-        this.styleList.delete(this.styleSelect.value);
-        this.styles.push(this.styleSelect.value);
+        item.innerText = style;
         element.appendChild(item);
 
+        this.styleList.delete(style);
+        this.styles.push(style);
+
         this.styleSelect = this._generateListSelect(this.styleList,
-            document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
+          document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
     }
 
     addExcludedArtist(element, inputField) {
@@ -151,14 +142,10 @@ export class Albums {
         element.innerHTML = '';
 
         this.styleList = new Set(styles);
-        this.genreList = new Set(genres);
 
         // regenerate the genre and style select boxes
-        this.genreSelect = this._generateListSelect(this.genreList,
-            document.getElementById("genre_select_plc"), this.genreDefaultText, 'genre_select');
         this.styleSelect = this._generateListSelect(this.styleList,
             document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
-        this.genres = [];
         this.styles = [];
     }
 

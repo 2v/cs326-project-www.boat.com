@@ -35,7 +35,7 @@ export async function generateAlbums(styles, albumCount, minimumHave) {
 
       let responseJSON = await response.json();
 
-      albums = albums.concat(responseJSON.results.filter(x => x.community.have > minimumHave)
+      albums = albums.concat(responseJSON.results.filter(x => x.community.have > minimumHave && x.thumb !== "")
         .map(x => { return {"url": `https://discogs.com${x.uri}`, "thumbnail": x.thumb}}))
     }
   }

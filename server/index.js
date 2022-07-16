@@ -25,6 +25,7 @@ const port = process.env.PORT || 8888;
 
 await database.connect();
 
+// ----------------- EXPRESS / PASSPORT / SESSION SETUP ------------ //
 
 // example code from: https://github.com/JMPerez/passport-spotify
 // Passport session setup.
@@ -97,8 +98,8 @@ const app = express();
 
 app.use(session({
   secret: 'keyboard cat',
-  resave: true, // originally false
-  saveUninitialized: true,  // originally false
+  resave: true,
+  saveUninitialized: true,
   store: new pgSession({
     pool: database.pool,
     tableName: 'user_sessions',
@@ -111,12 +112,12 @@ app.use(session({
 // persistent login sessions (recommended).
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(logger('dev'));
 app.use('/', express.static('client'));
 
+// TODO: refactor this file to use req and res rather than request and response
 app.get('/login', async (request, response) => {
   console.log('login prompt pressed');
 });
@@ -125,11 +126,6 @@ app.get('/logout', function(req, res){
   req.logout(function() {
     res.redirect('/');
   });
-});
-
-// TODO: Implement the /getAlbums endpoint
-app.post('/getAlbums', async (request, response) => {
-  const options = request.body;
 });
 
 // GET /auth/spotify
@@ -158,13 +154,7 @@ app.get(
   }
 );
 
-// an example of a route that includes the user's spotify information and will only work if the user is logged in with
-// spotify
-// app.get('/account', ensureAuthenticated, function (req, res) {
-//   // res.render('account.html', {user: req.user});
-//   res.json({ message: 'Hello World!', user: req.user });
-// });
-
+// route that includes the user's spotify information and will only work if the user is logged in with spotify
 app.get('/account', async (request, response) => {
   if (request.user) {
     response.json({'status': 'success', 'user': request.user});
@@ -172,6 +162,37 @@ app.get('/account', async (request, response) => {
     response.status(401).json({'status': 'failure'});
   }
 });
+
+
+// --------------- CRUD OPERATIONS ------------------- //
+
+app.post('/generateAlbums', async (req, res) => {
+  const options = req.body;
+  let albums = await generateAlbums(options.styles, 50, 150);
+
+  // if the user is logged in, we want to save their albums to the database
+  if (req.user) {
+    await database.saveAlbums(req.user.id, albums);
+  }
+
+  res.json(albums);
+});
+
+app.get('/styles', async (req, res) => {
+  const options = req.query;
+  const styleCount = options.styleCount;
+
+  if (req.user) {
+    let userStyles = shuffle(JSON.parse((await database.getStyles(req.user.id)).styles)).slice(0, styleCount);
+    res.json({'status': 'success', 'styles': userStyles});
+  } else {
+    res.status(401).json({'status': 'failure'});
+  }
+});
+
+
+
+// -------------------- SETUP WEBSERVER --------------------- //
 
 // This matches all routes that are not defined.
 app.all('*', async (request, response) => {
@@ -182,19 +203,6 @@ app.all('*', async (request, response) => {
 app.listen(port, () => {
   console.log(`Disc Cover listening on port ${port}!`);
 });
-
-// Simple route middleware to ensure user is authenticated.
-//   Use this route middleware on any resource that needs to be protected.  If
-//   the request is authenticated (typically via a persistent login session),
-//   the request will proceed. Otherwise, the user will be redirected to the
-//   login page.
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/');
-}
-
 
 // await database.saveStyles('1001', ['rock', 'classical'], today.getTime());
 // console.log(await database.getUser('1001'));
