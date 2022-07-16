@@ -12,6 +12,8 @@ albums.renderAlbums(albumPane);
 // display the user's spotify name if they are logged in
 const sessionUser = await readSessionUser();
 if (sessionUser.status === 'success') {
+    // The user is logged in on this session. Thus, we want to display their username and fetch their current list of
+    // albums, their tags, and their excluded artists from the database
     spotifyPane.innerHTML = `
         <h4>hello, ${sessionUser.user.displayName}</h4>
     `
@@ -39,6 +41,3 @@ document.getElementById("clear_excluded_artists").addEventListener("click", () =
 document.getElementById('add_excluded_artist').addEventListener('click', () => {
     albums.addExcludedArtist(excludedArtists, document.getElementById('exclude_artist_input'));
 });
-
-// TODO: make request to server to determine if user is logged in or not. If they are logged in we want to display
-//      their username. If they are not, we display the connect to spotify button

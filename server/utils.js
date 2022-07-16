@@ -4,6 +4,8 @@
 //   j ← random integer such that 0 ≤ j ≤ i
 // exchange a[j] and a[i]
 
+import Fuse from "fuse.js";
+
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
     let j = Math.floor(Math.random() * (i+1))
@@ -14,4 +16,26 @@ function shuffle(array) {
   return array;
 }
 
-export { shuffle }
+function parseStylesFromTopArtists(response, styleCount, styles) {
+  // use fuse to perform a fuzzy search of the styles database
+  const fuse = new Fuse(styles, { includeScore: true })
+
+  // search each genre for each artist using fuse and concatenate them together
+  let styleSearchResults = response.items.reduce((acc, e) => acc.concat(
+    e.genres.reduce((acc, e) => acc.concat(fuse.search(e)), [])), [])
+
+  // sort the search results to get the best matches
+  let bestMatches = styleSearchResults.sort((a, b) => a.score - b.score);
+
+  // use the sorted results to create a set of styles with size styleCount
+  let styleSet = new Set([]);
+  let i = 0;
+  while (styleSet.size < styleCount && i >= bestMatches.size) {
+    styleSet.add(bestMatches[i].item);
+    i++;
+  }
+
+  return styleSet;
+}
+
+export { shuffle, parseStylesFromTopArtists}

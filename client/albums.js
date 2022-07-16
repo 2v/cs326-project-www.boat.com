@@ -2,7 +2,7 @@ import {getState} from "./state.js";
 import {styles} from "./styles.js";
 import {genres} from "./genres.js";
 
-let placeholderImg = "https://m.media-amazon.com/images/I/51CgMxpH7RL._SX425_.jpg";
+let placeholderImg = "images/placeholder.png";
 
 export class Albums {
     constructor() {

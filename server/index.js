@@ -8,6 +8,7 @@ import { styles } from './styles.js'
 import {database} from "./database.js";   // for when we use a database for serialization / deserialization
 
 import epgSession from 'express-pg-session';
+import {parseStylesFromTopArtists} from "./utils.js";
 const pgSession = epgSession(session);
 
 
@@ -15,7 +16,7 @@ const SpotifyStrategy = passportSpotify.Strategy;
 
 const authCallbackPath = '/auth/spotify/callback';
 
-const port = process.env.PORT || 8888;
+const port = process.env.PORT || 3000;
 
 
 // example code from: https://github.com/JMPerez/passport-spotify
@@ -68,35 +69,15 @@ passport.use(
         );
 
         let responseJSON = await response.json();
+        let styles = parseStylesFromTopArtists(responseJSON, 20, styles);
 
-        const options = {
-          includeScore: true
-        }
 
-        // use fuse to perform a fuzzy search of the styles database
-        const fuse = new Fuse(styles, options)
+        // TODO: think about selecting a random set of these genres, since we are only sorting by relevance but
+        // a user's favorite genre might simply appear lower in the fuzzy score search
 
-        // for debugging
-        // let genres = responseJSON.items.reduce((acc, e) => acc.concat(e.genres), [])
-        // console.log(genres);
+        // TODO: once we have genre list, add to database
 
-        // search each genre for each artist using fuse and concatenate them together
-        let genresSearchResults = responseJSON.items.reduce((acc, e) => acc.concat(
-          e.genres.reduce((acc, e) => acc.concat(fuse.search(e)), [])), [])
-
-        // sort the search results to get the best matches
-        let bestMatches = genresSearchResults.sort((a, b) => a.score - b.score);
-
-        // use the sorted results to create a set of unique genres with size GENRE_LIST_SIZE
-        let GENRE_LIST_SIZE = 20;
-        let genreSet = new Set([]);
-        let i = 0;
-        while (genreSet.size < GENRE_LIST_SIZE || i >= bestMatches.size) {
-          genreSet.add(bestMatches[i].item);
-          i++;
-        }
-
-        console.log(genreSet);
+        console.log(styles);
     } catch(error) {
         console.log(error);
       }
@@ -203,3 +184,6 @@ function ensureAuthenticated(req, res, next) {
   }
   res.redirect('/');
 }
+
+await database.connect();
+await database.saveStyles('1001', ['rock', 'classical']);

@@ -33,16 +33,19 @@ class Database {
 
   async init() {
     const generateTables = `
-      create table if not exists styles (
-        style varchar(30),
+      create table if not exists user_styles (
+        user_id varchar(128) primary key,
+        -- we will serialize a user's list of style preferences and store it here
+        styles varchar (512)
+--         ts timestamp 
+        -- TODO: implement timestamp so that we can avoid regenerating styles if they were
+        --       generated recently
       );
 
-      create table if not exists users (
-        user_id varchar(30) primary key,
-        -- we will serialize a user's list of style preferences and store it here
-        styles varchar(300),
-        -- TODO: add a timestamp so we can check if we need to regenerate styles?
-      );     
+      create table if not exists user_exclusions (
+          user_id varchar(128) primary key,
+          exclusions varchar (1024)
+          );
     `;
     const res = await this.client.query(generateTables);
   }
@@ -53,6 +56,31 @@ class Database {
     await this.pool.end();
   }
 
+  /**
+   *
+   * @param {string} spotifyID
+   * @param {string[]} styles
+   */
+  async saveStyles(spotifyID, styles) {
+    // delete table entry if it exists
+    const deleteText = 'DELETE FROM user_styles WHERE user_id = ($1)';
+    await this.client.query(deleteText, [spotifyID]);
+
+    let stylesSerialized = JSON.stringify(styles);
+    const insertText = 'INSERT INTO user_styles (user_id, styles) VALUES ($1, $2) RETURNING *';
+    await this.client.query(insertText, [spotifyID, stylesSerialized]);
+  }
+
+  /**
+   *
+   * @param {string} spotifyID
+   */
+  async getStyles(spotifyID) {
+    const queryText =
+      'SELECT styles FROM user_styles WHERE user_id = ($1)'
+    const res = await this.client.query(queryText, [spotifyID]);
+    return res.rows();
+  }
 
 }
 
