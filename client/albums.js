@@ -182,5 +182,4 @@ export class Albums {
           .fill([]).map((y, j) => albums[i*4 + j]));
         this._saveAlbumState();
     }
-
 }
