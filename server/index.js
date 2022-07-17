@@ -13,6 +13,7 @@ const pgSession = epgSession(session);
 
 import {parseStylesFromTopArtists, shuffle} from "./utils.js";
 import {generateAlbums} from "./discogs.js";
+import {readStyles} from "../client/crud.js";
 
 
 // TODO: add documentation to functions
@@ -69,8 +70,11 @@ passport.use(
 
         let responseJSON = await response.json();
 
-        const TIME_SECONDS_TO_RELOAD_STYLES = 3600;
+        const TIME_SECONDS_TO_RELOAD_STYLES = 60;
         let dbUser = await database.readStyles(profile.id);
+        let today = new Date();
+
+        console.log(((new Date()).getTime() - dbUser.ts)/1000);
 
         // get style and album data if it doesn't exist in the table yet or if the data is stale
         if (dbUser.length < 1 || ((new Date()).getTime() - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_STYLES) {
@@ -181,11 +185,8 @@ app.get('/styles', async (req, res) => {
 
   if (req.user) {
     let userStyles = await database.readStyles(req.user.id);
-    if (userStyles === -1) {
-      res.json({'status': 'success', 'albums': []});
-    } else {
-      res.json({'status': 'success', 'styles': shuffle(JSON.parse(userStyles.styles)).slice(0, styleCount)});
-    }
+    console.log(userStyles);
+    res.json({'status': 'success', 'styles': shuffle(userStyles).slice(0, styleCount) });
   } else {
     res.status(401).json({'status': 'failure'});
   }
@@ -204,6 +205,24 @@ app.get('/albums', async (req, res) => {
   }
 });
 
+app.delete('/deleteStyle', async (req, res) => {
+  const options = req.query;
+  if (req.user) {
+    await database.deleteStyle(req.user.id, options.style);
+  } else {
+    res.status(401).json({'status': 'failure'});
+  }
+});
+
+app.post('/updateStyles', async (req, res) => {
+  const options = req.query;
+  if (req.user) {
+    await database.addStyle(req.user.id, options.newStyle);
+  } else {
+    res.status(401).json({'status': 'failure'});
+  }
+});
+
 // -------------------- SETUP WEBSERVER --------------------- //
 
 // This matches all routes that are not defined.
@@ -215,3 +234,9 @@ app.all('*', async (req, res) => {
 app.listen(port, () => {
   console.log(`Disc Cover listening on port ${port}!`);
 });
+
+// close database when we stop program
+process.on('SIGINT', async function () {
+  await database.close();
+  process.exit();
+})

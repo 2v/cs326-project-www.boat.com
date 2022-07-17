@@ -46,13 +46,13 @@ export async function readStyles(styleCount) {
 }
 
 export async function deleteStyle(style) {
-  const response = await fetch(`/deleteStyle?style=${style}`, {
+  return await fetch(`/deleteStyle?style=${style}`, {
     method: 'DELETE',
   });
 }
 
 export async function updateStyles(newStyle) {
-  const response = await fetch(`/updateStyles?newStyle=${newStyle}`, {
+  return await fetch(`/updateStyles?newStyle=${newStyle}`, {
     method: 'POST',
   });
 }

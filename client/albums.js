@@ -1,6 +1,6 @@
 import {getState, setState} from "./state.js";
 import {styles} from "./styles.js";
-import {readAlbums} from "./crud.js";
+import {deleteStyle, readAlbums, updateStyles} from "./crud.js";
 
 let placeholderImg = "images/placeholder.png";
 
@@ -24,14 +24,13 @@ export class Albums {
 
         this.styleList = new Set(styles);
         this.styles = [];
-        this._restoreStyleState(tagElement);
+        await this._restoreStyleState(tagElement);
 
         this.styleDefaultText = 'select a style';
 
         this.styleSelect = this._generateListSelect(this.styleList,
             this.styleSelectElement, this.styleDefaultText, 'style_select');
 
-        this.excludedArtists = [];
     }
 
     _generateListSelect(list, element, defaultText, id="") {
@@ -82,10 +81,14 @@ export class Albums {
         setState('styles', this.styles);
     }
 
-    _restoreStyleState() {
+    async _restoreStyleState() {
         let styles = getState('styles');
         if (styles) {
-            styles.forEach(style => this.addStyle(style, this.tagElement));
+            for (let i = 0; i < styles.length; i++) {
+                console.log(styles[i])
+                await this.addStyle(styles[i], this.tagElement);
+            }
+            // styles.forEach(style => this.addStyle(style, this.tagElement));
         }
     }
 
@@ -118,19 +121,19 @@ export class Albums {
         element.appendChild(rowDiv);
     }
 
-    addStyleFromSelect(element) {
+    async addStyleFromSelect(element) {
         if(this.styleSelect.value === this.styleDefaultText) {
             return -1;
         }
 
-        let status = this.addStyle(this.styleSelect.value, element);
+        let status = await this.addStyle(this.styleSelect.value, element, true);
 
         if (status === -1) {
             console.error('No such style exists in local database!')
         }
     }
 
-    addStyle(style, element) {
+    async addStyle(style, element, pushToDB=false) {
         if (!this.styleList.has(style)) {
             return -1;
         }
@@ -151,16 +154,19 @@ export class Albums {
 
         this.styleList.delete(style);
         this.styles.push(style);
+        this._saveStyleState();
+
+        // Update database with the new style
+        if (pushToDB) { await updateStyles(style);}
 
         this.styleSelect = this._generateListSelect(this.styleList,
           document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
 
-        this._saveStyleState();
 
         return 0;
     }
 
-    deleteStyle(styleID) {
+    async deleteStyle(styleID, pushToDB=false) {
         let style = styleID.slice(10)
         console.log("DELETING STYLE ".concat(style));
 
@@ -168,11 +174,13 @@ export class Albums {
 
         this.styleList.add(style);
         this.styles = this.styles.filter(x => x !== style);
+        this._saveStyleState();
 
         this.styleSelect = this._generateListSelect(this.styleList,
           document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
 
-        this._saveStyleState();
+        // delete style from the database
+        await deleteStyle(style);
 
         return 0;
     }

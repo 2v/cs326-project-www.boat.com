@@ -36,9 +36,8 @@ document.getElementById("add_tag").addEventListener("click", () => {
 
 document.getElementById("load_styles").addEventListener("click", async () => {
     let styles = await readStyles(4);
-    styles.every(style => {
-        let status = albums.addStyle(style, tags);
-        return (status !== -1);
+    styles.every(async style => {
+        return (await albums.addStyle(style, tags)) !== -1;
     });
 });
 

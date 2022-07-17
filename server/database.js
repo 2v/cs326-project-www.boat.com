@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import pg from 'pg';
+import format from 'pg-format';
 
 // Get the Pool class from the pg module.
 const { Pool } = pg;
@@ -34,11 +35,17 @@ class Database {
 
   async init() {
     const generateTables = `
-      create table if not exists user_styles (
+      create table if not exists users (
         id varchar(128) primary key,
-        styles varchar (512),
+--         styles varchar (512),
         ts bigint
       );
+
+      create table if not exists user_styles (
+          id varchar(128),
+          style varchar (50)
+--           ts bigint
+          );
 
       create table if not exists user_albums (
           id varchar(128) primary key,
@@ -62,13 +69,18 @@ class Database {
    */
   async saveStyles(spotifyID, styles, ts) {
     // perform UPSERT by deleting table if it exists and adding new entry
-    const deleteText = 'DELETE FROM user_styles WHERE id = ($1)';
+    const deleteText = 'DELETE FROM users WHERE id = ($1)';
     await this.client.query(deleteText, [spotifyID]);
 
-    let stylesSerialized = JSON.stringify(styles);
+    const insertText = 'INSERT INTO users (id, ts) VALUES ($1, $2) RETURNING *';
+    await this.client.query(insertText, [spotifyID, ts]);
 
-    const insertText = 'INSERT INTO user_styles (id, styles, ts) VALUES ($1, $2, $3) RETURNING *';
-    await this.client.query(insertText, [spotifyID, stylesSerialized, ts]);
+
+    let values = styles.map(style => [spotifyID, style]);
+    this.client.query(format('INSERT INTO user_styles (id, style) VALUES %L', values), [],
+      (err, result) => {
+        console.log(err);
+    });
   }
 
   /**
@@ -94,21 +106,32 @@ class Database {
    */
   async readStyles(spotifyID) {
     const queryText =
-      'SELECT * FROM user_styles WHERE id = ($1)'
+      'SELECT style FROM user_styles WHERE id = ($1)'
     const res = await this.client.query(queryText, [spotifyID]);
-    return res.rows.reduce((acc, e) => e, -1);  // return an item if there is any
+    return res.rows.map(x => x.style);    // should return an empty array if no entries exist
   }
 
   /**
    *
    * @param {string} spotifyID
+   * @param {string} style
    */
   async deleteStyle(spotifyID, style) {
-    let userStyles = await this.readStyles(spotifyID);
-    if (userStyles !== -1) {
-      let newStyles = JSON.parse(userStyles.styles).filter(x => x !== style);
-      await this.saveStyles(spotifyID, newStyles, (new Date()).getTime());
-    }
+    this.client.query(format('DELETE FROM user_styles WHERE id = %L AND style = %L', spotifyID, style), [],
+      (err, result) => {});
+  }
+
+  /**
+   *
+   * @param {string} spotifyID
+   * @param {string} style
+   */
+  async addStyle(spotifyID, style) {
+    await this.deleteStyle(spotifyID, style);
+    this.client.query(format('INSERT INTO user_styles (id, style) VALUES %L', [[spotifyID, style]]), [],
+      (err, result) => {
+        console.log(err);
+      });
   }
 
   /**
