@@ -85,10 +85,8 @@ export class Albums {
         let styles = getState('styles');
         if (styles) {
             for (let i = 0; i < styles.length; i++) {
-                console.log(styles[i])
                 await this.addStyle(styles[i], this.tagElement);
             }
-            // styles.forEach(style => this.addStyle(style, this.tagElement));
         }
     }
 
@@ -166,10 +164,8 @@ export class Albums {
         return 0;
     }
 
-    async deleteStyle(styleID, pushToDB=false) {
+    async deleteStyle(styleID) {
         let style = styleID.slice(10)
-        console.log("DELETING STYLE ".concat(style));
-
         document.getElementById(styleID).remove();
 
         this.styleList.add(style);

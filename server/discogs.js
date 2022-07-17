@@ -17,7 +17,6 @@ export async function generateAlbums(styles, albumCount, minimumHave, ) {
 
   for (const year of yearsToSearch) {
     for (const style of styles) {
-      // console.log(`${discogsURL}database/search?type=master&style=${style}&year=${year}&key=${DISCOGS_CONSUMER_KEY}&secret=${DISCOGS_CONSUMER_SECRET}`)
       let response = await fetch(
         `${discogsURL}database/search?type=master&style=${style}&year=${year}&key=${DISCOGS_CONSUMER_KEY}&secret=${DISCOGS_CONSUMER_SECRET}`,
         {
@@ -29,7 +28,6 @@ export async function generateAlbums(styles, albumCount, minimumHave, ) {
       );
 
       if (!response.ok) {
-        console.log("response not ok");
         return -1;
       }
 

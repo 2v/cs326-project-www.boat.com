@@ -2,14 +2,15 @@ import {Albums} from "./albums.js";
 import {createAlbums, readStyles, readSessionUser} from "./crud.js";
 
 const tags = document.getElementById('tags');
-const excludedArtists = document.getElementById('excluded_artists');
 const albumPane = document.getElementById('albums');
 const spotifyPane = document.getElementById('spotify_connect');
 const styleSelect = document.getElementById('style_select_plc');
+const spinner = document.getElementById('spinner');
 
 let albums = new Albums();
 await albums.init(tags, styleSelect);
 albums.renderAlbums(albumPane);
+spinner.style.display = 'none';
 
 // display the user's spotify name if they are logged in
 const sessionUser = await readSessionUser();
@@ -46,8 +47,10 @@ document.getElementById("generate").addEventListener("click", async () => {
         alert("You must have at least one style selected to generate albums!")
         return;
     }
+    spinner.style.display = 'block';
     albums.setAlbums(await createAlbums(albums.styles));
     albums.renderAlbums(albumPane);
+    spinner.style.display = 'none';
 });
 
 // Handle clicking on tags to remove them

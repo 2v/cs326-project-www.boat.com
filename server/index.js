@@ -4,7 +4,6 @@ import logger from 'morgan';
 import session from 'express-session';
 import passport from 'passport';
 import passportSpotify from 'passport-spotify';
-import Fuse from 'fuse.js';
 import { styles } from './styles.js'
 import {database} from "./database.js";   // for when we use a database for serialization / deserialization
 
@@ -13,7 +12,6 @@ const pgSession = epgSession(session);
 
 import {parseStylesFromTopArtists, shuffle} from "./utils.js";
 import {generateAlbums} from "./discogs.js";
-import {readStyles} from "../client/crud.js";
 
 
 // TODO: add documentation to functions
@@ -80,8 +78,6 @@ passport.use(
           let userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
           await database.saveStyles(profile.id, userStyles, currTime);
         }
-
-        // console.log(userStyles);
     } catch(error) {
         console.log(error);
       }
@@ -114,11 +110,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(logger('dev'));
 app.use('/', express.static('client'));
-
-// TODO: refactor this file to use req and res rather than request and response
-app.get('/login', async (request, response) => {
-  console.log('login prompt pressed');
-});
 
 app.get('/logout', function(req, res){
   req.logout(function() {
@@ -183,7 +174,6 @@ app.get('/styles', async (req, res) => {
 
   if (req.user) {
     let userStyles = await database.readStyles(req.user.id);
-    console.log(userStyles);
     res.json({'status': 'success', 'styles': shuffle(userStyles).slice(0, styleCount) });
   } else {
     res.status(401).json({'status': 'failure'});
