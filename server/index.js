@@ -5,6 +5,7 @@ import passport from 'passport';
 import passportSpotify from 'passport-spotify';
 import { styles } from './styles.js'
 import {database} from "./database.js";   // for when we use a database for serialization / deserialization
+import fetch from 'node-fetch';
 
 import epgSession from 'connect-pg-simple';
 const pgSession = epgSession(session);
@@ -13,7 +14,6 @@ import {parseStylesFromTopArtists, shuffle} from "./utils.js";
 import {generateAlbums} from "./discogs.js";
 
 
-// TODO: add documentation to functions
 const SpotifyStrategy = passportSpotify.Strategy;
 
 const authCallbackPath = '/auth/spotify/callback';
@@ -50,7 +50,7 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'http://localhost:' + port + authCallbackPath,
+      callbackURL: 'https://disc-cover.herokuapp.com' + authCallbackPath,
     },
     async function (accessToken, refreshToken, expires_in, profile, done) {
       try {

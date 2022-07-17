@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import {shuffle} from "./utils.js";
+import fetch from 'node-fetch';
 
 const discogsURL = "https://api.discogs.com/";
 const DISCOGS_CONSUMER_KEY = process.env.DISCOGS_CONSUMER_KEY;
