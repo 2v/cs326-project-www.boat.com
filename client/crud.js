@@ -6,7 +6,7 @@ export async function readSessionUser() {
   return await response.json();
 }
 
-export async function getAlbums() {
+export async function readAlbums() {
   const response = await fetch(`/albums`, {
     method: 'GET',
     headers: {
@@ -21,8 +21,8 @@ export async function getAlbums() {
   }
 }
 
-export async function generateAlbums(styles) {
-  const response = await fetch(`/generateAlbums`, {
+export async function createAlbums(styles) {
+  const response = await fetch(`/createAlbums`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ export async function generateAlbums(styles) {
   return await response.json();
 }
 
-export async function getStyles(styleCount) {
+export async function readStyles(styleCount) {
   const response = await fetch(`/styles?styleCount=${styleCount}`, {
     method: 'GET',
   });
@@ -43,4 +43,16 @@ export async function getStyles(styleCount) {
   } else {
     return [];
   }
+}
+
+export async function deleteStyle(style) {
+  const response = await fetch(`/deleteStyle?style=${style}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function updateStyles(newStyle) {
+  const response = await fetch(`/updateStyles?newStyle=${newStyle}`, {
+    method: 'POST',
+  });
 }

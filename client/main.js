@@ -1,5 +1,5 @@
 import {Albums} from "./albums.js";
-import {generateAlbums, getStyles, readSessionUser} from "./crud.js";
+import {createAlbums, readStyles, readSessionUser} from "./crud.js";
 
 const tags = document.getElementById('tags');
 const excludedArtists = document.getElementById('excluded_artists');
@@ -35,7 +35,7 @@ document.getElementById("add_tag").addEventListener("click", () => {
 });
 
 document.getElementById("load_styles").addEventListener("click", async () => {
-    let styles = await getStyles(4);
+    let styles = await readStyles(4);
     styles.every(style => {
         let status = albums.addStyle(style, tags);
         return (status !== -1);
@@ -47,7 +47,7 @@ document.getElementById("generate").addEventListener("click", async () => {
         alert("You must have at least one style selected to generate albums!")
         return;
     }
-    albums.setAlbums(await generateAlbums(albums.styles));
+    albums.setAlbums(await createAlbums(albums.styles));
     albums.renderAlbums(albumPane);
 });
 

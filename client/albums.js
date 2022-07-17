@@ -1,6 +1,6 @@
 import {getState, setState} from "./state.js";
 import {styles} from "./styles.js";
-import {getAlbums} from "./crud.js";
+import {readAlbums} from "./crud.js";
 
 let placeholderImg = "images/placeholder.png";
 
@@ -58,7 +58,7 @@ export class Albums {
 
     async _restoreAlbumState() {
         // first attempt to restore albums from the database
-        let albums = await getAlbums();
+        let albums = await readAlbums();
         if (albums.length > 0) {
             this.setAlbums(albums);
             return true;

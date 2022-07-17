@@ -4,6 +4,7 @@ import pg from 'pg';
 // Get the Pool class from the pg module.
 const { Pool } = pg;
 
+// TODO: add documentation to functions
 class Database {
   constructor(dbURL) {
     this.dbURL = dbURL;
@@ -91,18 +92,30 @@ class Database {
    *
    * @param {string} spotifyID
    */
-  async getStyles(spotifyID) {
+  async readStyles(spotifyID) {
     const queryText =
       'SELECT * FROM user_styles WHERE id = ($1)'
     const res = await this.client.query(queryText, [spotifyID]);
     return res.rows.reduce((acc, e) => e, -1);  // return an item if there is any
   }
+
   /**
    *
    * @param {string} spotifyID
    */
+  async deleteStyle(spotifyID, style) {
+    let userStyles = await this.readStyles(spotifyID);
+    if (userStyles !== -1) {
+      let newStyles = JSON.parse(userStyles.styles).filter(x => x !== style);
+      await this.saveStyles(spotifyID, newStyles, (new Date()).getTime());
+    }
+  }
 
-  async getAlbums(spotifyID) {
+  /**
+   *
+   * @param {string} spotifyID
+   */
+  async readAlbums(spotifyID) {
     const queryText =
       'SELECT * FROM user_albums WHERE id = ($1)'
     const res = await this.client.query(queryText, [spotifyID]);

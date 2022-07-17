@@ -1,3 +1,4 @@
+// some documentation from Passport Spotify example code (https://github.com/JMPerez/passport-spotify)
 import express from 'express';
 import logger from 'morgan';
 import session from 'express-session';
@@ -10,13 +11,11 @@ import {database} from "./database.js";   // for when we use a database for seri
 import epgSession from 'connect-pg-simple';
 const pgSession = epgSession(session);
 
-// import epgSession from 'express-pg-session';
-// const pgSession = epgSession(session);
-
 import {parseStylesFromTopArtists, shuffle} from "./utils.js";
 import {generateAlbums} from "./discogs.js";
 
 
+// TODO: add documentation to functions
 const SpotifyStrategy = passportSpotify.Strategy;
 
 const authCallbackPath = '/auth/spotify/callback';
@@ -27,7 +26,7 @@ await database.connect();
 
 // ----------------- EXPRESS / PASSPORT / SESSION SETUP ------------ //
 
-// example code from: https://github.com/JMPerez/passport-spotify
+
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
 //   serialize users into and deserialize users out of the session. Typically,
@@ -56,8 +55,6 @@ passport.use(
       callbackURL: 'http://localhost:' + port + authCallbackPath,
     },
     async function (accessToken, refreshToken, expires_in, profile, done) {
-      // TODO: add user's name to the database, this way we no longer have to interface with Spotify object
-      // a test of using the spotify API to get the top tracks
       try {
         let response = await fetch(
           "https://api.spotify.com/v1/me/top/artists",
@@ -72,12 +69,11 @@ passport.use(
 
         let responseJSON = await response.json();
 
-        const TIME_SECONDS_TO_RELOAD_ALBUMS = 60;
-        let dbUser = await database.getStyles(profile.id);
-        let today = new Date();
+        const TIME_SECONDS_TO_RELOAD_STYLES = 3600;
+        let dbUser = await database.readStyles(profile.id);
 
         // get style and album data if it doesn't exist in the table yet or if the data is stale
-        if (dbUser.length < 1 || (today.getTime() - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_ALBUMS) {
+        if (dbUser.length < 1 || ((new Date()).getTime() - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_STYLES) {
           console.log('FETCHING NEW DATA FOR USER')
           let userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
           await database.saveStyles(profile.id, userStyles, today.getTime());
@@ -144,7 +140,7 @@ app.get(
 // GET /auth/spotify/callback
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request. If authentication fails, the user will be redirected back to the
-//   login page. Otherwise, the primary route function function will be called,
+//   login page. Otherwise, the primary route function will be called,
 //   which, in this example, will redirect the user to the home page.
 app.get(
   authCallbackPath,
@@ -155,11 +151,11 @@ app.get(
 );
 
 // route that includes the user's spotify information and will only work if the user is logged in with spotify
-app.get('/account', async (request, response) => {
-  if (request.user) {
-    response.json({'status': 'success', 'user': request.user});
+app.get('/account', async (req, res) => {
+  if (req.user) {
+    res.json({'status': 'success', 'user': req.user});
   } else {
-    response.status(401).json({'status': 'failure'});
+    res.status(401).json({'status': 'failure'});
   }
 });
 
@@ -167,7 +163,7 @@ app.get('/account', async (request, response) => {
 // --------------- CRUD OPERATIONS ------------------- //
 
 // generates albums by searching discogs by style
-app.post('/generateAlbums', async (req, res) => {
+app.post('/createAlbums', async (req, res) => {
   const options = req.body;
   let albums = await generateAlbums(options.styles, 50, 150);
 
@@ -184,8 +180,12 @@ app.get('/styles', async (req, res) => {
   const styleCount = options.styleCount;
 
   if (req.user) {
-    let userStyles = shuffle(JSON.parse((await database.getStyles(req.user.id)).styles)).slice(0, styleCount);
-    res.json({'status': 'success', 'styles': userStyles});
+    let userStyles = await database.readStyles(req.user.id);
+    if (userStyles === -1) {
+      res.json({'status': 'success', 'albums': []});
+    } else {
+      res.json({'status': 'success', 'styles': shuffle(JSON.parse(userStyles.styles)).slice(0, styleCount)});
+    }
   } else {
     res.status(401).json({'status': 'failure'});
   }
@@ -193,7 +193,7 @@ app.get('/styles', async (req, res) => {
 
 app.get('/albums', async (req, res) => {
   if (req.user) {
-    let userAlbums = await database.getAlbums(req.user.id);
+    let userAlbums = await database.readAlbums(req.user.id);
     if (userAlbums === -1) {
       res.json({'status': 'success', 'albums': []});
     } else {
@@ -207,14 +207,11 @@ app.get('/albums', async (req, res) => {
 // -------------------- SETUP WEBSERVER --------------------- //
 
 // This matches all routes that are not defined.
-app.all('*', async (request, response) => {
-  response.status(404).send(`Not found: ${request.path}`);
+app.all('*', async (req, res) => {
+  res.status(404).send(`Not found: ${req.path}`);
 });
 
 // Start the server.
 app.listen(port, () => {
   console.log(`Disc Cover listening on port ${port}!`);
 });
-
-// await database.saveStyles('1001', ['rock', 'classical'], today.getTime());
-// console.log(await database.getUser('1001'));
