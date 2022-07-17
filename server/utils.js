@@ -16,6 +16,13 @@ function shuffle(array) {
   return array;
 }
 
+/**
+ * Parse the JSON response from Spotify and use it to find matching styles in the Discogs style database.
+ *
+ * @param {JSON} response the JSON response from Spotify when requesting a user's top artists
+ * @param {int} styleCount the amount of styles we want returned from the fuzzy search
+ * @param {int} styles the list of Discogs styles we are searching by Spotify styles
+ */
 function parseStylesFromTopArtists(response, styleCount, styles) {
   // use fuse to perform a fuzzy search of the styles database
   const fuse = new Fuse(styles, { includeScore: true })

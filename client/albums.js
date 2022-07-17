@@ -9,6 +9,15 @@ export class Albums {
     constructor() {
     }
 
+    /**
+     * Initializes the tag box, the tag selection form, and the album pane. Attempts to restore the album state, otherwise
+     * placeholder album images are displayed. DOM elements are passed to the class and used in other methods, so init
+     * *MUST* be called before calling any other methods in the Albums class
+     *
+     * @param {HTMLElement} tagElement the tag box element
+     * @param {HTMLElement} styleSelectElement the style select form element
+     * @param {HTMLElement} albumPaneElement the album panel element
+     */
     async init(tagElement, styleSelectElement, albumPaneElement) {
         if (!(await this._restoreAlbumState())) {
             this.albums = new Array(2).fill([]).map(x => new Array(4).fill({
@@ -88,6 +97,10 @@ export class Albums {
         }
     }
 
+    /**
+     * Renders the albums pane.
+     *
+     */
     renderAlbums() {
         this.albumPaneElement.innerHTML = '';
 
@@ -117,6 +130,10 @@ export class Albums {
         this.albumPaneElement.appendChild(rowDiv);
     }
 
+    /**
+     * Adds the style that is currently selected on the select form this class was initialized with.
+     *
+     */
     async addStyleFromSelect() {
         if(this.styleSelect.value === this.styleDefaultText) {
             return -1;
@@ -129,6 +146,14 @@ export class Albums {
         }
     }
 
+    /**
+     * Add a style.
+     *
+     * @param {string} style the style to add. Should be a part of the standard Discord style set
+     * @param {boolean} pushToDB whether or not to push this update to the database. Not always necessary. For example,
+     *          if we are restoring from local storage, we know that the tags have already been stored at some point
+     *          in the database for that user, so making another call would be redundant.
+     */
     async addStyle(style, pushToDB=false) {
         if (!this.styleList.has(style)) {
             return -1;
@@ -161,6 +186,12 @@ export class Albums {
         return 0;
     }
 
+    /**
+     * Remove a style
+     *
+     * @param {string} styleID the ID of the style button to remove. ID contains a standard string ending in the style
+     *              name so we can propagate this change to the database.
+     */
     async deleteStyle(styleID) {
         let style = styleID.slice(10)
         document.getElementById(styleID).remove();
@@ -177,6 +208,11 @@ export class Albums {
         return 0;
     }
 
+    /**
+     * Set the class albums to an albums object.
+     *
+     * @param {Object[]} albums albums is a list of objects of the form: {'url': URL, 'thumbnail': THUMBNAIL}
+     */
     setAlbums(albums) {
         this.albums = new Array(2).fill([]).map((x, i) => new Array(4)
           .fill([]).map((y, j) => albums[i*4 + j]));

@@ -1,3 +1,5 @@
+// Discogs style database
+
 export const styles = [
     "Pop Rock",
     "House",

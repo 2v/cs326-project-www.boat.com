@@ -1,4 +1,3 @@
-// some documentation from Passport Spotify example code (https://github.com/JMPerez/passport-spotify)
 import express from 'express';
 import logger from 'morgan';
 import session from 'express-session';
@@ -24,7 +23,7 @@ const port = process.env.PORT || 8888;
 await database.connect();
 
 // ----------------- EXPRESS / PASSPORT / SESSION SETUP ------------ //
-
+// some documentation from Passport Spotify example code (https://github.com/JMPerez/passport-spotify)
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to

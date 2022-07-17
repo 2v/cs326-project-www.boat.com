@@ -5,9 +5,20 @@ const discogsURL = "https://api.discogs.com/";
 const DISCOGS_CONSUMER_KEY = process.env.DISCOGS_CONSUMER_KEY;
 const DISCOGS_CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET;
 
-// use a minimumHave count to ensure that we are only suggesting relevant albums. Some albums with barely any haves
-// are usually releases which are not relevant to most users, however we do want to ensure that we are finding music
-// from smaller independent artists so this should be small
+
+/**
+ * Perform a search of the Discogs database for the specified styles. All search results are from the current and
+ * past year. These are then compiled and then shuffled and sliced to return the correct album count.
+ *
+ * We use a minimumHave count to ensure that we are only suggesting relevant albums. The have metric is used on discogs
+ * to track how many users own a certain album, so it is a good measure of relevance. Albums with few haves
+ * are releases which are not relevant to most users, however we do want to ensure that we are finding music
+ * from smaller independent artists so this should value should still be small.
+ *
+ * @param {string[]} styles
+ * @param {int} albumCount
+ * @param {int} minimumHave
+ */
 export async function generateAlbums(styles, albumCount, minimumHave, ) {
   let albums = []; // albums will be a list containing objects with thumbnail image and link to discogs page
 

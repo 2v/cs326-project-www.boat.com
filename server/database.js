@@ -37,14 +37,12 @@ class Database {
     const generateTables = `
       create table if not exists users (
         id varchar(128) primary key,
---         styles varchar (512),
         ts bigint
       );
 
       create table if not exists user_styles (
           id varchar(128),
           style varchar (50)
---           ts bigint
           );
 
       create table if not exists user_albums (
@@ -62,6 +60,9 @@ class Database {
   }
 
   /**
+   * Save a list of styles to the database with a timestamp. Performs an upsert for both tables, removing the
+   * existing user entry and adding a new one with the updated timestamp. Old style preferences are removed from
+   * the styles table.
    *
    * @param {string} spotifyID
    * @param {string[]} styles
@@ -69,10 +70,8 @@ class Database {
    */
   async saveStyles(spotifyID, styles, ts) {
     // perform UPSERT by deleting table if it exists and adding new entry
-    const deleteText = 'DELETE FROM users WHERE id = ($1)';
-    await this.client.query(deleteText, [spotifyID]);
-    const insertText = 'INSERT INTO users (id, ts) VALUES ($1, $2) RETURNING *';
-    await this.client.query(insertText, [spotifyID, ts]);
+    await this.client.query(format('DELETE FROM users WHERE id = %L', spotifyID));
+    await this.client.query(format('INSERT INTO users (id, ts) VALUES (%L, %L) RETURNING *', spotifyID, ts));
 
     // delete existing styles
     await this.client.query(format('DELETE FROM user_styles WHERE id = %L', spotifyID));
@@ -82,34 +81,30 @@ class Database {
   }
 
   /**
+   * Store an album array in the database. Serializes the album object and stores it with the user ID.
    *
    * @param {string} spotifyID
-   * @param {string[]} styles
-   * @param {int} ts
+   * @param {Object[]} albums
    */
   async saveAlbums(spotifyID, albums) {
-    // perform UPSERT by deleting table if it exists and adding new entry
-    const deleteText = 'DELETE FROM user_albums WHERE id = ($1)';
-    await this.client.query(deleteText, [spotifyID]);
+    await this.client.query(format('DELETE FROM user_albums WHERE id = %L', spotifyID));
 
     let albumsSerialized = JSON.stringify(albums);
-
-    const insertText = 'INSERT INTO user_albums (id, albums) VALUES ($1, $2) RETURNING *';
-    await this.client.query(insertText, [spotifyID, albumsSerialized]);
+    await this.client.query(format('INSERT INTO user_albums (id, albums) VALUES %L', [[spotifyID, albumsSerialized]]));
   }
 
   /**
+   * Read a user.
    *
    * @param {string} spotifyID
    */
   async readUser(spotifyID) {
     const res = await this.client.query(format('SELECT * FROM users WHERE id = %L', spotifyID));
     return res.rows.reduce((acc, e) => e, []);
-    // const res = await this.client.query(queryText, [spotifyID]);
-    // return res.rows.map(x => x.style);    // should return an empty array if no entries exist
   }
 
   /**
+   * Read a user's stored styles.
    *
    * @param {string} spotifyID
    */
@@ -121,6 +116,7 @@ class Database {
   }
 
   /**
+   * Remove a style preference for a user.
    *
    * @param {string} spotifyID
    * @param {string} style
@@ -131,6 +127,7 @@ class Database {
   }
 
   /**
+   * Add a style preference for a user. This is performed as an upsert.
    *
    * @param {string} spotifyID
    * @param {string} style
@@ -144,6 +141,7 @@ class Database {
   }
 
   /**
+   * Read a user's albums.
    *
    * @param {string} spotifyID
    */
