@@ -6,6 +6,18 @@ export async function readSessionUser() {
   return await response.json();
 }
 
+export async function readStyleList() {
+  const response = await fetch(`/styleList`, {
+    method: 'GET',
+  });
+
+  if (response.ok) {
+    return (await response.json()).styles;
+  } else {
+    return -1;
+  }
+}
+
 export async function readAlbums() {
   const response = await fetch(`/albums`, {
     method: 'GET',

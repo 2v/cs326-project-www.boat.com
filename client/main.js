@@ -28,11 +28,10 @@ if (sessionUser.status === 'success') {
     `
 }
 
-// TODO: tags should persist in browser local storage
 // TODO: define DOM elements as constants at top of document to clean up main file
-document.getElementById("add_tag").addEventListener("click", () => {
+document.getElementById("add_tag").addEventListener("click", async () => {
     // albums.addGenre(tags);
-    albums.addStyleFromSelect(tags);
+    await albums.addStyleFromSelect(tags);
 });
 
 document.getElementById("load_styles").addEventListener("click", async () => {
@@ -54,9 +53,8 @@ document.getElementById("generate").addEventListener("click", async () => {
 });
 
 // Handle clicking on tags to remove them
-document.addEventListener('click',function(e){
+document.addEventListener('click',async (e) => {
     if(e.target && e.target.id.slice(0, 10) === 'style-btn-'){
-        albums.deleteStyle(e.target.id);
-        //do something
+        await albums.deleteStyle(e.target.id);
     }
 });

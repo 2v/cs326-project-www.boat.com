@@ -154,6 +154,9 @@ app.get('/account', async (req, res) => {
 
 
 // --------------- CRUD OPERATIONS ------------------- //
+app.get('/styleList', async (req, res) => {
+  res.json({'status': 'success', 'styles': styles});
+});
 
 // generates albums by searching discogs by style
 app.post('/createAlbums', async (req, res) => {

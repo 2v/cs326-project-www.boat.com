@@ -1,11 +1,9 @@
 import {getState, setState} from "./state.js";
-import {styles} from "./styles.js";
-import {deleteStyle, readAlbums, updateStyles} from "./crud.js";
+import {deleteStyle, readAlbums, readStyleList, updateStyles} from "./crud.js";
 
-let placeholderImg = "images/placeholder.png";
-
-// TODO: have file for constants like these?
+const styles = await readStyleList();
 const MAX_STYLES = 8;
+let placeholderImg = "images/placeholder.png";
 
 export class Albums {
     constructor() {
