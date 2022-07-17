@@ -6,10 +6,13 @@ const albumPane = document.getElementById('albums');
 const spotifyPane = document.getElementById('spotify_connect');
 const styleSelect = document.getElementById('style_select_plc');
 const spinner = document.getElementById('spinner');
+const addTagButton = document.getElementById("add_tag");
+const loadStylesButton = document.getElementById("load_styles");
+const generateButton = document.getElementById("generate");
 
 let albums = new Albums();
-await albums.init(tags, styleSelect);
-albums.renderAlbums(albumPane);
+await albums.init(tags, styleSelect, albumPane);
+albums.renderAlbums();
 spinner.style.display = 'none';
 
 // display the user's spotify name if they are logged in
@@ -28,27 +31,26 @@ if (sessionUser.status === 'success') {
     `
 }
 
-// TODO: define DOM elements as constants at top of document to clean up main file
-document.getElementById("add_tag").addEventListener("click", async () => {
+addTagButton.addEventListener("click", async () => {
     // albums.addGenre(tags);
-    await albums.addStyleFromSelect(tags);
+    await albums.addStyleFromSelect();
 });
 
-document.getElementById("load_styles").addEventListener("click", async () => {
+loadStylesButton.addEventListener("click", async () => {
     let styles = await readStyles(4);
     styles.every(async style => {
-        return (await albums.addStyle(style, tags)) !== -1;
+        return (await albums.addStyle(style)) !== -1;
     });
 });
 
-document.getElementById("generate").addEventListener("click", async () => {
+generateButton.addEventListener("click", async () => {
     if (albums.styles.length < 1) {
         alert("You must have at least one style selected to generate albums!")
         return;
     }
     spinner.style.display = 'block';
     albums.setAlbums(await createAlbums(albums.styles));
-    albums.renderAlbums(albumPane);
+    albums.renderAlbums();
     spinner.style.display = 'none';
 });
 

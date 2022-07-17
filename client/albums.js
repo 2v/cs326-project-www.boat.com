@@ -9,7 +9,7 @@ export class Albums {
     constructor() {
     }
 
-    async init(tagElement, styleSelectElement) {
+    async init(tagElement, styleSelectElement, albumPaneElement) {
         if (!(await this._restoreAlbumState())) {
             this.albums = new Array(2).fill([]).map(x => new Array(4).fill({
                 'url': '/',
@@ -19,20 +19,20 @@ export class Albums {
 
         this.tagElement = tagElement;
         this.styleSelectElement = styleSelectElement;
+        this.albumPaneElement = albumPaneElement;
 
         this.styleList = new Set(styles);
         this.styles = [];
-        await this._restoreStyleState(tagElement);
+        await this._restoreStyleState();
 
         this.styleDefaultText = 'select a style';
 
-        this.styleSelect = this._generateListSelect(this.styleList,
-            this.styleSelectElement, this.styleDefaultText, 'style_select');
+        this.styleSelect = this._generateListSelect(this.styleList, this.styleDefaultText, 'style_select');
 
     }
 
-    _generateListSelect(list, element, defaultText, id="") {
-        element.innerHTML = '';
+    _generateListSelect(list, defaultText, id="") {
+        this.styleSelectElement.innerHTML = '';
 
         const select = document.createElement('select');
         select.classList.add('form-select');
@@ -48,7 +48,7 @@ export class Albums {
             option.innerText = text;
             select.appendChild(option);
         });
-        element.appendChild(select);
+        this.styleSelectElement.appendChild(select);
 
         return select;
     }
@@ -83,13 +83,13 @@ export class Albums {
         let styles = getState('styles');
         if (styles) {
             for (let i = 0; i < styles.length; i++) {
-                await this.addStyle(styles[i], this.tagElement);
+                await this.addStyle(styles[i]);
             }
         }
     }
 
-    renderAlbums(element) {
-        element.innerHTML = '';
+    renderAlbums() {
+        this.albumPaneElement.innerHTML = '';
 
         let rowDiv = document.createElement('div');
         rowDiv.classList.add('row');
@@ -114,22 +114,22 @@ export class Albums {
             })
             rowDiv.appendChild(colDiv);
         })
-        element.appendChild(rowDiv);
+        this.albumPaneElement.appendChild(rowDiv);
     }
 
-    async addStyleFromSelect(element) {
+    async addStyleFromSelect() {
         if(this.styleSelect.value === this.styleDefaultText) {
             return -1;
         }
 
-        let status = await this.addStyle(this.styleSelect.value, element, true);
+        let status = await this.addStyle(this.styleSelect.value, true);
 
         if (status === -1) {
             console.error('No such style exists in local database!')
         }
     }
 
-    async addStyle(style, element, pushToDB=false) {
+    async addStyle(style, pushToDB=false) {
         if (!this.styleList.has(style)) {
             return -1;
         }
@@ -146,7 +146,7 @@ export class Albums {
 
         item.id = 'style-btn-'.concat(style);
         item.innerText = style;
-        element.appendChild(item);
+        this.tagElement.appendChild(item);
 
         this.styleList.delete(style);
         this.styles.push(style);
@@ -155,8 +155,7 @@ export class Albums {
         // Update database with the new style
         if (pushToDB) { await updateStyles(style);}
 
-        this.styleSelect = this._generateListSelect(this.styleList,
-          document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
+        this.styleSelect = this._generateListSelect(this.styleList, this.styleDefaultText, 'style_select');
 
 
         return 0;
@@ -170,8 +169,7 @@ export class Albums {
         this.styles = this.styles.filter(x => x !== style);
         this._saveStyleState();
 
-        this.styleSelect = this._generateListSelect(this.styleList,
-          document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
+        this.styleSelect = this._generateListSelect(this.styleList, this.styleDefaultText, 'style_select');
 
         // delete style from the database
         await deleteStyle(style);
