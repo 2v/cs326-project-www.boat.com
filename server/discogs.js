@@ -8,7 +8,7 @@ const DISCOGS_CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET;
 // use a minimumHave count to ensure that we are only suggesting relevant albums. Some albums with barely any haves
 // are usually releases which are not relevant to most users, however we do want to ensure that we are finding music
 // from smaller independent artists so this should be small
-export async function generateAlbums(styles, albumCount, minimumHave) {
+export async function generateAlbums(styles, albumCount, minimumHave, ) {
   let albums = []; // albums will be a list containing objects with thumbnail image and link to discogs page
 
   // search this and last year to avoid querying too much
@@ -42,10 +42,4 @@ export async function generateAlbums(styles, albumCount, minimumHave) {
 
   return shuffle(albums).slice(0, albumCount);
 }
-//
-// let albums = await generateAlbums(['Hip Hop'], 10, 100);
-// console.log(albums);
-
-// TODO: possibly use database to store a users suggestions and allow them to view past album recommendations
-//      we could use Passport for this, users who are logged in will be able to access their past set of recommended albums
 

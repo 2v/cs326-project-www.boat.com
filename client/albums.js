@@ -144,7 +144,8 @@ export class Albums {
         item.type = 'button';
         item.classList.add('btn');
         item.classList.add('btn-primary');
-        item.classList.add('style-btn');
+
+        item.id = 'style-btn-'.concat(style);
         item.innerText = style;
         element.appendChild(item);
 
@@ -159,35 +160,21 @@ export class Albums {
         return 0;
     }
 
-    addExcludedArtist(element, inputField) {
-        if(inputField.value === '') {
-            return -1;
-        }
+    deleteStyle(styleID) {
+        let style = styleID.slice(10)
+        console.log("DELETING STYLE ".concat(style));
 
-        let item = document.createElement('button');
-        item.type = 'button';
-        item.classList.add('btn');
-        item.classList.add('btn-secondary');
-        item.innerText = inputField.value;
-        this.excludedArtists.push(this.styleSelect.value);
-        element.appendChild(item);
-    }
+        document.getElementById(styleID).remove();
 
-    clearTags(element) {
-        element.innerHTML = '';
+        this.styleList.add(style);
+        this.styles = this.styles.filter(x => x !== style);
 
-        this.styleList = new Set(styles);
-
-        // regenerate the genre and style select boxes
         this.styleSelect = this._generateListSelect(this.styleList,
-            document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
-        this.styles = [];
-        this._saveStyleState();
-    }
+          document.getElementById("style_select_plc"), this.styleDefaultText, 'style_select');
 
-    clearExclusions(element) {
-        element.innerHTML = '';
-        this.excludedArtists = [];
+        this._saveStyleState();
+
+        return 0;
     }
 
     setAlbums(albums) {

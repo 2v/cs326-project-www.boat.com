@@ -34,24 +34,12 @@ document.getElementById("add_tag").addEventListener("click", () => {
     albums.addStyleFromSelect(tags);
 });
 
-document.getElementById("clear_tags").addEventListener("click", () => {
-    albums.clearTags(tags);
-});
-
 document.getElementById("load_styles").addEventListener("click", async () => {
     let styles = await getStyles(4);
     styles.every(style => {
         let status = albums.addStyle(style, tags);
         return (status !== -1);
     });
-});
-
-document.getElementById("clear_excluded_artists").addEventListener("click", () => {
-    albums.clearExclusions(excludedArtists);
-});
-
-document.getElementById('add_excluded_artist').addEventListener('click', () => {
-    albums.addExcludedArtist(excludedArtists, document.getElementById('exclude_artist_input'));
 });
 
 document.getElementById("generate").addEventListener("click", async () => {
@@ -61,4 +49,12 @@ document.getElementById("generate").addEventListener("click", async () => {
     }
     albums.setAlbums(await generateAlbums(albums.styles));
     albums.renderAlbums(albumPane);
+});
+
+// Handle clicking on tags to remove them
+document.addEventListener('click',function(e){
+    if(e.target && e.target.id.slice(0, 10) === 'style-btn-'){
+        albums.deleteStyle(e.target.id);
+        //do something
+    }
 });

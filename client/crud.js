@@ -44,13 +44,3 @@ export async function getStyles(styleCount) {
     return [];
   }
 }
-
-export async function updateStyles(styleCount) {
-
-}
-
-export async function deleteStyle(styleCount) {
-
-}
-
-
