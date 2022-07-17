@@ -71,16 +71,14 @@ passport.use(
         let responseJSON = await response.json();
 
         const TIME_SECONDS_TO_RELOAD_STYLES = 60;
-        let dbUser = await database.readStyles(profile.id);
-        let today = new Date();
-
-        console.log(((new Date()).getTime() - dbUser.ts)/1000);
+        let dbUser = await database.readUser(profile.id);
+        let currTime = (new Date()).getTime();
 
         // get style and album data if it doesn't exist in the table yet or if the data is stale
-        if (dbUser.length < 1 || ((new Date()).getTime() - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_STYLES) {
+        if (dbUser.length < 1 || (currTime - dbUser.ts)/1000 > TIME_SECONDS_TO_RELOAD_STYLES) {
           console.log('FETCHING NEW DATA FOR USER')
           let userStyles = parseStylesFromTopArtists(responseJSON, 20, styles);
-          await database.saveStyles(profile.id, userStyles, today.getTime());
+          await database.saveStyles(profile.id, userStyles, currTime);
         }
 
         // console.log(userStyles);

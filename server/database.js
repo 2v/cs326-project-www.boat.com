@@ -71,16 +71,14 @@ class Database {
     // perform UPSERT by deleting table if it exists and adding new entry
     const deleteText = 'DELETE FROM users WHERE id = ($1)';
     await this.client.query(deleteText, [spotifyID]);
-
     const insertText = 'INSERT INTO users (id, ts) VALUES ($1, $2) RETURNING *';
     await this.client.query(insertText, [spotifyID, ts]);
 
+    // delete existing styles
+    await this.client.query(format('DELETE FROM user_styles WHERE id = %L', spotifyID));
 
     let values = styles.map(style => [spotifyID, style]);
-    this.client.query(format('INSERT INTO user_styles (id, style) VALUES %L', values), [],
-      (err, result) => {
-        console.log(err);
-    });
+    await this.client.query(format('INSERT INTO user_styles (id, style) VALUES %L', values));
   }
 
   /**
@@ -104,6 +102,17 @@ class Database {
    *
    * @param {string} spotifyID
    */
+  async readUser(spotifyID) {
+    const res = await this.client.query(format('SELECT * FROM users WHERE id = %L', spotifyID));
+    return res.rows.reduce((acc, e) => e, []);
+    // const res = await this.client.query(queryText, [spotifyID]);
+    // return res.rows.map(x => x.style);    // should return an empty array if no entries exist
+  }
+
+  /**
+   *
+   * @param {string} spotifyID
+   */
   async readStyles(spotifyID) {
     const queryText =
       'SELECT style FROM user_styles WHERE id = ($1)'
@@ -117,7 +126,7 @@ class Database {
    * @param {string} style
    */
   async deleteStyle(spotifyID, style) {
-    this.client.query(format('DELETE FROM user_styles WHERE id = %L AND style = %L', spotifyID, style), [],
+    await this.client.query(format('DELETE FROM user_styles WHERE id = %L AND style = %L', spotifyID, style), [],
       (err, result) => {});
   }
 
@@ -128,7 +137,7 @@ class Database {
    */
   async addStyle(spotifyID, style) {
     await this.deleteStyle(spotifyID, style);
-    this.client.query(format('INSERT INTO user_styles (id, style) VALUES %L', [[spotifyID, style]]), [],
+    await this.client.query(format('INSERT INTO user_styles (id, style) VALUES %L', [[spotifyID, style]]), [],
       (err, result) => {
         console.log(err);
       });
