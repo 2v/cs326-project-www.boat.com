@@ -5,6 +5,9 @@ Disc cover is a one-page app which profiles a user's Spotify account to find sty
 ### How to run?
 Use `npm start` after performing `npm install`.
 
+### Note on spotify connections
+Currently, only uses specifically added by me can use the app. To allow for any user to login with spotify I need to submit a Quota Extension through the Spotify developer portal which will need to be approved.
+
 ### Note: additional libraries used:
 - Passport-Spotify (https://www.passportjs.org/packages/passport-spotify/): a Passport strategy for authenticating with spotify
 - connect-pg-simple (https://www.npmjs.com/package/connect-pg-simple): used with passport to maintain session for a logged-in user
